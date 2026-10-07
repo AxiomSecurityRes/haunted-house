@@ -90,6 +90,8 @@ header{position:relative;display:flex;align-items:center;gap:10px;padding:8px 10
 #toast button{border:0;background:transparent;color:var(--marker);font-weight:700;font-size:13px;padding:0}
 #quick{position:absolute;left:8px;right:8px;bottom:56px;margin:0 auto;width:max-content;max-width:calc(100% - 16px);display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:5px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:3;box-shadow:0 2px 8px rgba(0,0,0,.12)}
 #quick[hidden]{display:none}
+#quick button[hidden]{display:none}
+#quick .qmore{background:var(--ink)!important;color:var(--paper)!important;font-weight:800}
 #quick::-webkit-scrollbar{display:none}
 #quick button{flex:none;border:0;background:var(--panel2);border-radius:10px;padding:9px 12px;font-size:13.5px;font-weight:600;white-space:nowrap}
 #quick button[data-q=del]{color:var(--danger)}
@@ -237,12 +239,19 @@ table.sched th{position:sticky;top:0;background:var(--panel2);font-weight:700}
 #rotBtn{position:absolute;left:8px;top:50%;transform:translateY(-50%);z-index:4;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:9px 10px;font-weight:800;font-size:12.5px;box-shadow:0 4px 12px rgba(0,0,0,.15);writing-mode:horizontal-tb}
 #rotBtn.on{background:var(--sel);color:#fff;border-color:var(--sel)}
 #rotBtn[hidden],#movePad[hidden]{display:none}
-#movePad{position:absolute;right:8px;bottom:112px;z-index:4;display:grid;grid-template-columns:repeat(3,46px);grid-auto-rows:46px;gap:5px;padding:6px;background:rgba(20,20,24,.55);border-radius:16px;backdrop-filter:blur(4px);touch-action:none}
+#padOpen{position:absolute;right:10px;bottom:118px;z-index:4;border:0;border-radius:999px;background:rgba(20,20,24,.78);color:#fff;font-weight:800;font-size:13px;padding:10px 14px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+#padOpen[hidden]{display:none}
+#movePad .hval{flex-direction:column;background:#1d4ed8!important;color:#fff!important;font-size:15px!important}
+#movePad .hval small{font-size:9px;opacity:.9;margin:0}
+#movePad .mph{background:#dbeafe!important;color:#1d4ed8!important}
+#movePad .mpmin{font-size:11px!important;background:rgba(255,255,255,.55)!important}
+#movePad.noh .mph{visibility:hidden}
+#movePad{position:absolute;right:8px;bottom:112px;z-index:4;display:grid;grid-template-columns:repeat(3,44px) 54px;grid-auto-rows:44px;gap:5px;padding:6px;background:rgba(20,20,24,.55);border-radius:16px;backdrop-filter:blur(4px);touch-action:none}
 #movePad button{border:0;border-radius:12px;background:rgba(255,255,255,.92);color:#111;font-size:20px;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;user-select:none;-webkit-user-select:none}
 #movePad button small{font-size:9px;font-weight:700;margin-top:2px}
 #movePad [data-mp=step]{font-size:12px;background:#2f5d4a;color:#fff}
 #movePad button:active{transform:scale(.93)}
-#movePad .mph[hidden],#movePad .mpr[hidden]{visibility:hidden;display:flex}
+#movePad .mpr[hidden]{visibility:hidden;display:flex}
 body[data-mode=tour] #rotBtn,body[data-mode=present] #rotBtn{display:none!important}
 #updBar{position:absolute;left:8px;right:8px;top:8px;z-index:9;margin:0 auto;width:max-content;max-width:calc(100% - 16px);display:flex;gap:8px;align-items:center;background:#1d4ed8;color:#fff;border-radius:14px;padding:8px 8px 8px 14px;font-weight:700;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
 #updBar[hidden]{display:none}
@@ -311,6 +320,7 @@ body[data-mode=tour] #rotBtn,body[data-mode=present] #rotBtn{display:none!import
 .tab.on i{filter:none;opacity:1}
 .tab .n{position:absolute;top:3px;right:calc(50% - 22px);min-width:16px;height:16px;border-radius:8px;background:var(--danger);color:#fff!important;font-size:10px!important;line-height:16px;padding:0 4px;margin:0!important}
 .tab .n:empty{display:none}
+#cnt{background:var(--panel2)!important;color:var(--muted)!important;border:1px solid var(--line)}
 .grab{display:none;border:0;background:transparent;padding:8px 0 4px;width:100%;touch-action:none;cursor:ns-resize}
 .grab span{display:block;width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto}
 @media (max-width:899px){.grab{display:block}.fold{display:none}#sheet{border-radius:16px 16px 0 0;box-shadow:0 -6px 20px rgba(0,0,0,.12)}}
@@ -500,6 +510,17 @@ details.sec.host{border-color:#f2b705}
 .thumbs img.miss{opacity:.3}
 .mtab{width:100%;border-collapse:collapse;font-size:13px;margin:4px 0 8px}
 .mtab th,.mtab td{border-bottom:1px solid var(--line);padding:5px 4px;text-align:left}
+.bkstat{margin:8px 0;padding:10px 12px;border:1px solid #2fb344;border-radius:12px;background:rgba(47,179,68,.08);font-size:13.5px;line-height:1.6}
+.bkstat.warn{border-color:#f2b705;background:rgba(242,183,5,.1)}.bkstat.bad{border-color:var(--danger);background:rgba(229,72,77,.1);color:var(--danger);font-weight:700}
+.bkstat .row{margin:6px 0 0}
+.msec{font-size:12.5px;font-weight:800;color:var(--muted);margin:10px 0 2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mrow2{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.mrow2 .dot{width:9px;height:9px;border-radius:50%;flex:none}
+.mrow2 .mm{flex:1;min-width:0}.mrow2 b{display:block;font-size:14px}.mrow2 b small{font-weight:500;color:var(--muted)}
+.mrow2 .mm>small{color:var(--muted);font-size:12px}
+.pchips{display:flex;gap:3px;flex:none}
+.pchip{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:6px 9px;font-size:12px;font-weight:700}
+.pchip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .ddays{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:2px 0 10px}
 .dd{border:1px solid var(--line);border-radius:14px;padding:10px 8px;text-align:center;background:var(--paper)}
 .dd b{display:block;font-size:22px;font-weight:800;letter-spacing:-.01em}
@@ -576,7 +597,7 @@ details.sec>*:last-child{margin-bottom:12px}
       <div id="coord" hidden></div>
       <div id="roBar" hidden></div>
       <button id="rotBtn" hidden>🔄 회전</button>
-      <div id="movePad" hidden><button data-mp="hu" class="mph">▲<small>높이</small></button><button data-mp="u">↑</button><button data-mp="rl" class="mpr">⟲</button><button data-mp="l">←</button><button data-mp="step">10cm</button><button data-mp="r">→</button><button data-mp="hd" class="mph">▼<small>높이</small></button><button data-mp="d">↓</button><button data-mp="rr" class="mpr">⟳</button></div>
+      <button id="padOpen" hidden>🕹️ 이동·높이</button><div id="movePad" hidden><button data-mp="rl" class="mpr">⟲</button><button data-mp="u">↑</button><button data-mp="rr" class="mpr">⟳</button><button data-mp="hu" class="mph">▲</button><button data-mp="l">←</button><button data-mp="step">10cm</button><button data-mp="r">→</button><button data-mp="hmode" class="mph hval"></button><button data-mp="min" class="mpmin">접기</button><button data-mp="d">↓</button><span></span><button data-mp="hd" class="mph">▼</button></div>
       <div id="updBar" hidden><span></span><button id="updGo">새로고침</button><button id="updX" aria-label="닫기">✕</button></div>
       <div id="followBadge" hidden><span></span><button id="followOff">그만</button></div>
       <div id="layerBadge" hidden>천장 보기 · 바닥 물건은 흐리게 <button id="layerOff">해제</button></div>
@@ -938,7 +959,7 @@ function makeLabel(text,opts){
   x.fillStyle=opts.ink||css('--ink');x.fillText(t,padX,h/2+2);
   const tex=new THREE.CanvasTexture(cv);tex.anisotropy=4;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,depthWrite:false,transparent:true,sizeAttenuation:false}));
-  const hh=(opts.size||0.034)*1.12*(+settings.uiScale||1)*(window.innerWidth<500?0.85:1);sp.userData.base=[hh*w/h,hh];sp.scale.set(hh*w/h,hh,1);sp.renderOrder=999;
+  const hh=(opts.size||0.034)*1.12*(+settings.uiScale||1)*(window.innerWidth<500?0.95:1);sp.userData.base=[hh*w/h,hh];sp.scale.set(hh*w/h,hh,1);sp.renderOrder=999;
   labelSprites.add(sp);
   return sp;
 }
@@ -1778,6 +1799,7 @@ function fireReconcile(segs){
     const remote=fireTree.items||{};
     if(top==='items'&&segs[1]){const id=segs[1];if(remote[id])upsertRemote(id,remote[id]);else removeRemote(id);}
     else{
+      {const gone=state.items.filter(it=>it.cat!=='fixture'&&!remote[it.id]).length;if(dbLoaded&&gone>=10)emergencyLocal('다른 기기에서 '+gone+'개가 한꺼번에 사라지기 직전');}
       Object.keys(remote).forEach(id=>upsertRemote(id,remote[id]));
       state.items.slice().forEach(it=>{if(!remote[it.id])removeRemote(it.id);});
     }
@@ -1969,9 +1991,7 @@ function hostPanelHTML(){
   h+='<div class="invnew"><input type="text" id="ivLabel" placeholder="링크 이름 (예: 2모둠)" maxlength="30"><select id="ivRole"><option value="edit">✏️ 편집</option><option value="view">👀 보기</option></select><button class="btn primary" id="ivAdd">만들기</button></div>';
   h+='<label class="tg"><span>코드 없는 옛 링크로도 편집 허용<small>끄면 예전에 보낸 기본 링크는 보기 전용</small></span><input type="checkbox" id="acOpen"'+(A.openEdit!==false?' checked':'')+'></label>';
   h+='<label class="tg"><span>🔒 방 잠그기 (관리자만 편집)<small>최종 확정 후 실수 방지</small></span><input type="checkbox" id="acLock"'+(A.locked?' checked':'')+'></label>';
-  const mem=Object.keys(fireMembers).filter(k=>k!==myCid&&fireMembers[k]).sort((a,b)=>(fireMembers[b].seen||0)-(fireMembers[a].seen||0));
-  h+='<div class="glabel">참여자 '+mem.length+'명</div>'+(mem.length?'':'<p class="empty">아직 들어온 친구가 없어요. 위 초대 링크를 보내 보세요.</p>')+mem.map(k=>{const m=fireMembers[k];const ov=(A.members||{})[k]||{};const on=online.has(k);
-    return '<div class="memrow"><i class="dot" style="background:'+(on?'#2fb344':'var(--line)')+'"></i><div class="mm"><b data-mname="'+esc(k)+'"></b><small>'+(m.role?esc(m.role)+' · ':'')+(m.inv&&inv[m.inv]?esc(inv[m.inv].label):'기본 링크')+' · '+(on?'접속 중':ago(m.seen||m.at||0))+'</small></div>'+(on?'':'<button class="pm" data-mrm="'+esc(k)+'" aria-label="목록에서 빼기" title="목록에서 빼기">✕</button>')+(+m.req&&!ov.perm?'<button class="btn primary mini" data-mapprove="'+esc(k)+'">✋ 허용</button>':'')+'<select data-mperm="'+esc(k)+'"><option value=""'+(!ov.perm?' selected':'')+'>링크대로</option><option value="edit"'+(ov.perm==='edit'?' selected':'')+'>✏️ 편집</option><option value="view"'+(ov.perm==='view'?' selected':'')+'>👀 보기</option><option value="banned"'+(ov.perm==='banned'?' selected':'')+'>⛔ 막기</option></select></div>';}).join('');
+  h+=membersHTML();
   h+='</details>'+backupPanelHTML()+'<details class="sec host" open><summary>🔑 관리자 링크</summary>';
   h+='<div class="row"><button class="btn" id="adminLink">🔑 관리자 링크 (내 다른 기기용)</button></div><p class="note">관리자 링크는 나만 보관하세요. 이 링크로 열면 그 기기도 관리자가 돼요. 권한은 링크로 나누는 방식이라 실수는 막지만, 작정하고 뚫으려는 사람까지 막지는 못해요.</p></details>';
   return h;
@@ -1990,14 +2010,14 @@ function bindHost(el){
   el.querySelectorAll('[data-mapprove]').forEach(b=>b.onclick=()=>approveEdit(b.dataset.mapprove));
   el.querySelectorAll('[data-mperm]').forEach(sel=>sel.onchange=()=>{A.members=A.members||{};const k=sel.dataset.mperm;if(sel.value)A.members[k]={perm:sel.value};else delete A.members[k];writeAccess();});
   el.querySelectorAll('[data-mname]').forEach(x=>{const m=fireMembers[x.dataset.mname];x.textContent=(m&&m.name)||'익명';});
-  bindBackupPanel(el);
+  bindBackupPanel(el);bindMembers(el);
   const al=q('#adminLink');if(al)al.onclick=()=>{const link=shareLink('',adminKeyFor(backend.room));modal('🔑 관리자 링크','<p class="askmsg">이 링크는 <b>나만</b> 보관하세요. 다른 사람이 열면 그 사람도 관리자가 돼요.</p><textarea readonly style="min-height:80px">'+esc(link)+'</textarea><div class="row"><button class="btn primary" id="cp">복사</button></div>',b=>{b.querySelector('#cp').onclick=()=>copyText(link,b.querySelector('textarea'));});};
 }
 
 /* =========================================================
    app version check + server-side automatic backups (Firebase)
    ========================================================= */
-const APP_VERSION='2026.10.05-17';
+const APP_VERSION='2026.10.07-18';
 let updShown=false;
 async function checkUpdate(){
   if(inClaude||updShown||!/^https?:$/.test(location.protocol))return;
@@ -2012,7 +2032,7 @@ function scheduleAllFlush(){[...pending].forEach(id=>flush(id));}
 setTimeout(checkUpdate,15000);setInterval(checkUpdate,5*60000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate();});
 
-const BK_EVERY=15*60000,BK_KEEP=40;
+const BK_EVERY=10*60000,BK_KEEP=60;
 let bkDirty=0,bkLast=0,bkBusy=false,bkRulesOk=null,bkIndex=null,bkIndexAt=0;
 function bkBase(){return backend.base+'/backups/'+backend.room;}
 async function bkReq(path,method,body){
@@ -2024,8 +2044,9 @@ function snapshot(){return {v:1,app:APP_VERSION,at:Date.now(),items:state.items.
 async function serverBackup(kind,label){
   if(!backend||backend.kind!=='fire'||bkBusy)return false;bkBusy=true;
   try{const id=Date.now().toString(36)+randCode(4);const data=snapshot();const json=JSON.stringify(data);
+    let list=[];try{list=await bkLoadIndex();}catch(e){}const daily=!list.some(x=>x.daily&&dayKey(x.at)===dayKey(data.at));
     await bkReq('/data/'+id,'PUT',data);
-    await bkReq('/index/'+id,'PUT',{at:data.at,by:(nick||'익명').slice(0,20),kind:kind||'auto',label:String(label||'').slice(0,40),n:data.items.filter(i=>i.cat!=='fixture').length,size:json.length,pin:false});
+    await bkReq('/index/'+id,'PUT',{at:data.at,by:(nick||'익명').slice(0,20),kind:kind||'auto',label:String(label||'').slice(0,40),n:data.items.filter(i=>i.cat!=='fixture').length,size:json.length,pin:daily,daily,app:APP_VERSION});
     bkRulesOk=true;bkLast=Date.now();bkDirty=0;bkIndex=null;await bkPrune();return true;
   }catch(e){return false;}finally{bkBusy=false;}
 }
@@ -2048,15 +2069,15 @@ async function serverRestore(id){
   toast('🗂️ '+new Date(d.at).toLocaleString('ko-KR')+' 백업으로 되돌렸어요');
 }
 function downloadJSON(obj,name){try{const url=URL.createObjectURL(new Blob([JSON.stringify(obj,null,1)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},500);}catch(e){toast('다운로드를 할 수 없는 환경이에요');}}
-const BK_KIND={auto:'자동',manual:'수동',pre:'되돌리기 전'};
+const BK_KIND={auto:'자동',manual:'수동',pre:'직전 자동 저장'};
 function backupPanelHTML(){
   return '<details class="sec host" id="bkSec"'+(bkOpen?' open':'')+'><summary>🗂️ 자동 백업 (서버) <em>'+(bkIndex?bkIndex.length+'개':'열어서 확인')+'</em></summary>'+
-    '<p class="note">편집이 있으면 <b>15분마다</b> 공유 방 전체(설계·구매·할 일)를 서버에 자동 저장해요. 최근 '+BK_KEEP+'개를 남기고, 📌 고정한 백업은 지워지지 않아요. 누가 켜 두든 편집 중인 사람의 기기가 대신 저장해요.</p>'+
+    '<p class="note">편집이 있으면 <b>10분마다</b> 공유 방 전체(설계·구매·할 일)를 서버에 자동 저장해요. 최근 '+BK_KEEP+'개를 남기고, <b>하루 첫 백업은 날짜별로 영구 보관</b>돼요. 📌 고정한 백업도 지워지지 않아요. 새 버전을 처음 열 때, 여러 개를 한꺼번에 지울 때, 되돌릴 때도 직전 상태를 자동 저장해요. 누가 켜 두든 편집 중인 사람의 기기가 대신 저장해요.</p>'+
     (bkRulesOk===false?'<div class="alert">데이터베이스 규칙에 백업 칸이 없어서 저장할 수 없어요. 아래 새 규칙을 Firebase 콘솔 → Realtime Database → 규칙에 붙여 넣고 게시해 주세요.<div class="row"><button class="btn" id="bkRules">새 규칙 보기</button></div></div>':'')+
     '<div class="row"><button class="btn primary" id="bkNow">지금 백업</button><button class="btn" id="bkRefresh">목록 새로고침</button></div><div id="bkList">'+(bkIndex?bkListHTML():'<p class="note">불러오는 중…</p>')+'</div></details>';
 }
 let bkOpen=false;
-function bkListHTML(){if(!bkIndex.length)return '<p class="empty">아직 서버 백업이 없어요. “지금 백업”을 눌러 첫 백업을 만드세요.</p>';return bkIndex.map(x=>'<div class="bkrow2'+(x.pin?' pin':'')+'"><div><b>'+new Date(x.at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</b><small>'+(BK_KIND[x.kind]||x.kind)+' · '+esc(x.by||'')+' · 항목 '+(x.n||0)+'개'+(x.label?' · '+esc(x.label):'')+'</small></div><button class="pm" data-bkpin="'+x.id+'" aria-label="고정">'+(x.pin?'📌':'📍')+'</button><button class="pm" data-bkdl="'+x.id+'" aria-label="내려받기">⬇</button><button class="btn" data-bkres="'+x.id+'">되돌리기</button></div>').join('');}
+function bkListHTML(){if(!bkIndex.length)return '<p class="empty">아직 서버 백업이 없어요. “지금 백업”을 눌러 첫 백업을 만드세요.</p>';return bkIndex.map(x=>'<div class="bkrow2'+(x.pin?' pin':'')+'"><div><b>'+new Date(x.at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+(x.daily?' <span class="rolepill">날짜별 보관</span>':'')+'</b><small>'+(BK_KIND[x.kind]||x.kind)+' · '+esc(x.by||'')+' · 항목 '+(x.n||0)+'개'+(x.label?' · '+esc(x.label):'')+'</small></div><button class="pm" data-bkpin="'+x.id+'" aria-label="고정">'+(x.pin?'📌':'📍')+'</button><button class="pm" data-bkdl="'+x.id+'" aria-label="내려받기">⬇</button><button class="btn" data-bkres="'+x.id+'">되돌리기</button></div>').join('');}
 async function fillBackupList(el,noFetch){
   const box=el.querySelector('#bkList');if(!box)return;
   if(!noFetch)try{await bkLoadIndex();}catch(e){box.innerHTML='<p class="note warn">'+(bkRulesOk===false?'규칙 업데이트가 필요해요 (위 안내 참고)':'목록을 불러오지 못했어요')+'</p>';return;}
@@ -2429,18 +2450,16 @@ function coarse(){return window.matchMedia('(pointer:coarse)').matches||window.i
 function updateMovePad(){
   const pad=$('#movePad');if(!pad)return;const it=selId&&getItem(selId);
   const show=it&&!multi&&!readOnly&&canEditItem(it)&&coarse()&&!tour&&settings.mode!=='present'&&!placeKey&&!draw&&settings.movePad!==false;
-  pad.hidden=!show;if(!show)return;
+  const mini=lsGet('bf-padmin')==='1';$('#padOpen').hidden=!(show&&mini);
+  pad.hidden=!show||mini;if(!show||mini)return;
   pad.querySelector('[data-mp=step]').textContent=padStep+'cm';
-  const canH=it.type==='wall'||(it.type==='box'&&mountOf(it)!=='ceil');pad.querySelectorAll('.mph').forEach(x=>x.hidden=!canH);
-  pad.querySelectorAll('.mpr').forEach(x=>x.hidden=!(it.type==='box'));
+  pad.querySelectorAll('.mpr').forEach(x=>x.hidden=!(it.type==='box'));updatePadHeight();
 }
 function camAxes(){cam.getWorldDirection(_dd);let fx=_dd.x,fz=_dd.z;if(Math.abs(_dd.y)>0.9){const u=cam.up.clone().applyQuaternion(cam.quaternion);fx=u.x;fz=u.z;}
   if(Math.abs(fx)>Math.abs(fz)){fx=Math.sign(fx);fz=0;}else{fz=Math.sign(fz)||-1;fx=0;}return {f:[fx,fz],r:[-fz,fx]};}
 function padMove(dir){
   const it=getItem(selId);if(!it||readOnly||!canEditItem(it))return;
-  if(dir==='hu'||dir==='hd'){const s=dir==='hu'?padStep:-padStep;beginTx(it.id,'pad');
-    if(it.type==='wall')it.v=Math.max(0,Math.round((it.v+s)*10)/10);else it.y=Math.max(0,Math.round(((it.y||0)+s)*10)/10);
-    refreshItem(it.id);persist(it.id);syncForm();updateSel();return;}
+  if(dir==='hu'||dir==='hd'){padHeight(dir==='hu'?1:-1);return;}
   if(dir==='rl'||dir==='rr'){rotateItem(it,dir==='rr'?15:-15);updateSel();return;}
   const a=camAxes();const v=dir==='u'?a.f:dir==='d'?[-a.f[0],-a.f[1]]:dir==='r'?a.r:[-a.r[0],-a.r[1]];
   moveBy(it,v[0]*padStep,v[1]*padStep);updateSel();
@@ -2451,9 +2470,12 @@ function padMove(dir){
   pad.querySelectorAll('[data-mp]').forEach(b=>{
     const d=b.dataset.mp;
     if(d==='step'){b.onclick=()=>{const st=[1,5,10,50];padStep=st[(st.indexOf(padStep)+1)%st.length];lsSet('bf-padstep',String(padStep));updateMovePad();};return;}
+    if(d==='hmode'){b.onclick=()=>{hMode=hMode==='size'?'pos':'size';lsSet('bf-hmode',hMode);updatePadHeight();toast(hMode==='size'?'▲▼로 물건 키(높이 크기)를 바꿔요':'▲▼로 바닥에서 띄운 높이를 바꿔요');};return;}
+    if(d==='min'){b.onclick=()=>{lsSet('bf-padmin','1');updateMovePad();};return;}
     b.addEventListener('pointerdown',e=>{e.preventDefault();fire(d);clearInterval(rep);let n=0;rep=setInterval(()=>{if(++n>3)fire(d);},120);});
     ['pointerup','pointercancel','pointerleave'].forEach(t=>b.addEventListener(t,()=>{clearInterval(rep);rep=null;const it=getItem(selId);if(it)persist(it.id,true);}));
   });
+  $('#padOpen').onclick=()=>{lsSet('bf-padmin','');updateMovePad();};
   const rb=$('#rotBtn');if(rb)rb.onclick=()=>{settings.lockRot=!settings.lockRot;saveSettings();applyCamMode();toast(settings.lockRot?'한 손가락으로 화면을 옮겨요 (회전 잠금)':'한 손가락으로 화면을 돌려요');};
 })();
 /* touch: grab the selected item even if the finger lands a little off it */
@@ -2472,7 +2494,7 @@ function nearSel(e,it){
   sh.addEventListener('focusout',()=>{clearTimeout(t);t=setTimeout(()=>{const a=document.activeElement;if(a&&sh.contains(a)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName))return;if(grown){grown=false;sh.style.height=prev||'';applySheetFrac();}},250);});
   if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>{const a=document.activeElement;if(a&&sh.contains(a)&&/INPUT|TEXTAREA/.test(a.tagName)){try{a.scrollIntoView({block:'center'});}catch(_){}}});
 })();
-{const _rq=renderQuick;renderQuick=function(){_rq.apply(this,arguments);updateMovePad();updateRoBar();};}
+{const _rq=renderQuick;renderQuick=function(){_rq.apply(this,arguments);compactQuick();updateMovePad();updateRoBar();};}
 setTimeout(applyCamMode,0);
 /* =========================================================
    v17: field-level sync for the shared plan (현황) — no lost edits
@@ -2505,6 +2527,7 @@ function sendGame(){
 }
 /* ----- update log (shown in 설정 and after an update) ----- */
 const CHANGELOG=[
+  ['2026.10.07-18','10/7',['백업 강화: 하루 첫 백업은 날짜별 영구 보관, 새 버전 처음 열 때·여러 개 삭제·모두 지우기 직전 자동 백업, 10분 간격·60개 보관','함께 탭에 누구나 볼 수 있는 백업 상태 + 지금 백업 + 내 기기에 저장','휴대폰 이동 패드에 높이 조절(바닥에서 높이 ⇄ 물건 키, 천장 물건 포함), 패드 접기','빠른 버튼 정리(⋯ 더보기), 목록 개수 배지 회색으로','참여자 목록: 접속 중/최근/오래된 기록으로 묶고 같은 이름 합치기, 편집·보기·막기 버튼, 오래된 기록 한 번에 정리']],
   ['2026.10.05-17','10/6',['현황(할 일·예산·역할) 동시 편집 시 서로의 수정이 덮어써지던 문제 해결 — 바뀐 칸만 저장','관리자: 잠긴 물건 편집, 모든 메모 삭제, “모두 지우기”는 관리자만, 참여자 목록 정리','업데이트 기록 보기 (설정 탭)','모바일 편집 점검: 입력할 때 패널이 자동으로 커지고 키보드 위로 칸이 보이게, 길게 누를 때 뜨던 메뉴 막기','관리자는 잠긴 물건도 바로 편집','업데이트 후 기존 데이터 보존 검증 (예전 버전으로 만든 방을 새 버전으로 열어도 변경 없음)']],
   ['2026.10.05-16','10/6',['나갔다 들어오면 보기 전용이 되던 문제 해결 (일시 오류 자동 복구)','보기 전용 안내줄: ✋ 편집 요청 · 🔗 링크 넣기','휴대폰 이동 패드, 평면 보기 지도식 이동, 3D 회전 잠금']],
   ['2026.10.05-15','10/6',['보안 점검: 사진 형식 검증, 공개 코드에서 출석 번호 삭제','개인정보 안내 문구 추가']],
@@ -2519,6 +2542,123 @@ function showChangelog(){
 setTimeout(()=>{const seen=lsGet('bf-seenver');if(seen&&seen!==APP_VERSION)toast('✨ '+APP_VERSION+' 버전으로 업데이트됐어요','바뀐 점',showChangelog);lsSet('bf-seenver',APP_VERSION);},2500);
 
 document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-clog]');if(b){e.preventDefault();showChangelog();}});
+/* =========================================================
+   v18: never-lose-data backups, height control on phones,
+   compact quick bar, simpler member list
+   ========================================================= */
+/* ---------- backups: daily keepers, pre-update, pre-bulk-delete ---------- */
+function dayKey(t){const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+async function safeBackup(kind,label){
+  if(!backend||backend.kind!=='fire'||readOnly)return false;
+  for(let i=0;i<20&&bkBusy;i++)await new Promise(r=>setTimeout(r,300));
+  return serverBackup(kind,label);
+}
+async function bkStatusLoad(){try{await bkLoadIndex();}catch(e){}scheduleTeam();}
+function bkStatusHTML(){
+  if(!backend||backend.kind!=='fire')return '';
+  if(bkRulesOk===false)return '<div class="bkstat bad">🗂️ 서버 백업을 저장할 수 없어요 — 관리자에게 알려 주세요 (데이터베이스 규칙)</div>';
+  if(!bkIndex)return '<div class="bkstat">🗂️ 서버 백업 확인 중…</div>';
+  const last=bkIndex[0],daily=bkIndex.filter(x=>x.daily).length;
+  const age=last?Date.now()-last.at:Infinity;
+  return '<div class="bkstat'+(age>2*3600000?' warn':'')+'">🗂️ 서버 백업 <b>'+bkIndex.length+'개</b>'+(last?' · 최근 <b>'+ago(last.at)+'</b> ('+esc(last.label||BK_KIND[last.kind]||last.kind)+', 항목 '+(last.n||0)+'개)':' · 아직 없음')+(daily?' · 날짜별 보관 '+daily+'개':'')+
+    '<div class="row"><button class="btn mini" id="bkNowAll"'+(readOnly?' disabled':'')+'>지금 백업</button><button class="btn mini" id="dlMine">⬇ 내 기기에 저장</button></div></div>';
+}
+function bindBkStatus(el){
+  const a=el.querySelector('#bkNowAll');if(a)a.onclick=async()=>{a.disabled=true;const ok=await safeBackup('manual','직접 저장');a.disabled=false;toast(ok?'🗂️ 서버에 백업했어요':'백업하지 못했어요');bkStatusLoad();};
+  const d=el.querySelector('#dlMine');if(d)d.onclick=()=>downloadJSON(snapshot(),'귀신의집-'+new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')+'.json');
+}
+/* once per app version per room: snapshot before this version writes anything substantive */
+let preUpdDone=false;
+function maybePreUpdateBackup(){
+  if(preUpdDone||!backend||backend.kind!=='fire'||readOnly||!dbLoaded)return;preUpdDone=true;
+  const k='bf-bkver:'+backend.room;if(lsGet(k)===APP_VERSION)return;
+  bkLoadIndex().then(list=>{const l=list[0];if(l&&Date.now()-l.at<5*60000&&l.app===APP_VERSION){lsSet(k,APP_VERSION);return;}
+    return safeBackup('pre','새 버전 '+APP_VERSION+' 처음 열기 전').then(ok=>{if(ok)lsSet(k,APP_VERSION);});}).catch(()=>{preUpdDone=false;});
+}
+setInterval(maybePreUpdateBackup,4000);
+/* local emergency copy if a remote change wipes many items at once */
+function emergencyLocal(why){
+  try{let arr=JSON.parse(localStorage.getItem(BK_KEY)||'[]');arr.push({at:Date.now(),mode,count:state.items.filter(i=>i.cat!=='fixture').length,room:state.room,items:state.items.map(clone),catalog:state.catalog,why});
+    while(arr.length>6)arr.shift();for(;;){try{localStorage.setItem(BK_KEY,JSON.stringify(arr));break;}catch(e){if(arr.length<=1)break;arr.shift();}}}catch(e){}
+}
+
+/* ---------- height control on the move pad ---------- */
+let hMode=lsGet('bf-hmode')||'pos';
+function heightInfo(it){
+  if(!it||it.type==='region'||it.type==='path')return null;
+  const pos=it.type==='wall'?it.v:(it.y||0);
+  return {pos,size:it.h,canPos:true,canSize:true};
+}
+function padHeight(sign){
+  const it=getItem(selId);if(!it||readOnly||!canEditItem(it))return;const hi=heightInfo(it);if(!hi)return;
+  const st=padStep*sign;beginTx(it.id,'pad');
+  if(hMode==='size'){const nh=clamp(Math.round((it.h+st)*10)/10,1,H);if(it.type==='wall')it.h=Math.min(nh,H-it.v);else it.h=Math.min(nh,H-(it.y||0));}
+  else if(it.type==='wall')it.v=clamp(Math.round((it.v+st)*10)/10,0,Math.max(0,H-it.h));
+  else it.y=clamp(Math.round(((it.y||0)+st)*10)/10,0,Math.max(0,H-it.h));
+  refreshItem(it.id);persist(it.id);syncForm();updateSel();updatePadHeight();
+}
+function updatePadHeight(){
+  const pad=$('#movePad');if(!pad)return;const it=selId&&getItem(selId);const hi=heightInfo(it);
+  pad.classList.toggle('noh',!hi);if(!hi)return;
+  const lab=pad.querySelector('[data-mp=hmode]');
+  lab.innerHTML='<small>'+(hMode==='size'?'키':'바닥에서')+'</small><b>'+fmt(hMode==='size'?hi.size:hi.pos)+'</b><small>cm ⇄</small>';
+}
+
+/* ---------- compact quick bar on phones ---------- */
+let quickMore=false,quickFor=null;
+const QUICK_MAIN=new Set(['edit','del','rot','dup','more','st:plan','st:prep','st:done','own','unfix','hide','mdel','mdup','mclear','mend']);
+function compactQuick(){
+  const el=$('#quick');if(!el||el.hidden)return;
+  if(selId!==quickFor){quickFor=selId;quickMore=false;}
+  if(window.innerWidth>=900||multi)return;
+  const bs=[...el.querySelectorAll('button[data-q]')];const extra=bs.filter(b=>!QUICK_MAIN.has(b.dataset.q));
+  if(extra.length<2)return;
+  extra.forEach(b=>{b.hidden=!quickMore;});
+  ['up','down'].forEach(q=>{const b=el.querySelector('[data-q='+q+']');if(b)b.remove();});
+  const m=document.createElement('button');m.dataset.q='more';m.className='qmore';m.textContent=quickMore?'접기 ✕':'⋯ 더보기';
+  m.onclick=e=>{e.stopPropagation();quickMore=!quickMore;renderQuick();};el.appendChild(m);
+}
+
+/* ---------- simpler member list ---------- */
+let memOld=false;
+function memberGroups(){
+  const A=fireAccess||{};const online=new Set(peersN.map(p=>p.key));const now=Date.now();
+  const rows={};
+  Object.keys(fireMembers).forEach(k=>{if(k===myCid)return;const m=fireMembers[k];if(!m)return;
+    const nm=(m.name||'').trim();const anon=!nm||nm==='익명';const key=anon?'anon:'+k:'n:'+nm;
+    const r=rows[key]||(rows[key]={name:anon?'이름 없음':nm,anon,keys:[],seen:0,on:false,role:'',inv:'',req:0});
+    r.keys.push(k);r.seen=Math.max(r.seen,+m.seen||+m.at||0);if(online.has(k))r.on=true;if(m.role)r.role=m.role;if(m.inv)r.inv=m.inv;r.req=Math.max(r.req,+m.req||0);});
+  const list=Object.values(rows).map(r=>{const ps=r.keys.map(k=>((A.members||{})[k]||{}).perm||'');r.perm=ps.every(p=>p===ps[0])?ps[0]:'mixed';return r;});
+  const on=list.filter(r=>r.on),recent=list.filter(r=>!r.on&&now-r.seen<24*3600000&&!r.anon),old=list.filter(r=>!r.on&&!(now-r.seen<24*3600000&&!r.anon));
+  const by=(a,b)=>b.seen-a.seen;return {on:on.sort(by),recent:recent.sort(by),old:old.sort(by),total:list.length};
+}
+function memberRowHTML(r){
+  const inv=(fireAccess&&fireAccess.invites)||{};const keys=r.keys.join(',');
+  const base=r.inv&&inv[r.inv]?(inv[r.inv].role==='view'?'보기':'편집'):((fireAccess||{}).openEdit===false?'보기':'편집');
+  const chip=(v,l)=>'<button class="pchip'+(r.perm===v?' on':'')+'" data-mset="'+esc(keys)+'" data-v="'+v+'">'+l+'</button>';
+  return '<div class="mrow2"><i class="dot" style="background:'+(r.on?'#2fb344':'var(--line)')+'"></i><div class="mm"><b>'+esc(r.name)+(r.keys.length>1?' <small>· 기기 '+r.keys.length+'</small>':'')+'</b><small>'+(r.role?esc(r.role)+' · ':'')+(r.on?'접속 중':ago(r.seen))+' · 기본 '+base+(r.perm&&r.perm!=='mixed'?'':'')+'</small></div>'+
+    (r.req&&!r.perm?'<button class="btn primary mini" data-mapprove2="'+esc(keys)+'">✋ 허용</button>':'')+
+    '<div class="pchips">'+chip('edit','편집')+chip('view','보기')+chip('banned','막기')+'</div></div>';
+}
+function membersHTML(){
+  const g=memberGroups();let h='<div class="glabel">참여자 '+g.total+'명 <span class="note" style="font-weight:400">· 편집/보기/막기를 누르면 그 사람에게만 적용, 다시 누르면 기본(링크대로)</span></div>';
+  if(!g.total)return h+'<p class="empty">아직 들어온 친구가 없어요. 위 초대 링크를 보내 보세요.</p>';
+  if(g.on.length)h+='<div class="msec">🟢 지금 접속 '+g.on.length+'</div>'+g.on.map(memberRowHTML).join('');
+  if(g.recent.length)h+='<div class="msec">최근 24시간 '+g.recent.length+'</div>'+g.recent.map(memberRowHTML).join('');
+  if(g.old.length){h+='<div class="msec">오래된·이름 없는 기록 '+g.old.length+' <button class="btn mini" id="memOldT">'+(memOld?'접기':'펼치기')+'</button> <button class="btn mini" id="memClean">정리</button></div>';if(memOld)h+=g.old.map(memberRowHTML).join('');}
+  return h;
+}
+function bindMembers(el){
+  const A=fireAccess;
+  el.querySelectorAll('[data-mset]').forEach(b=>b.onclick=()=>{if(!isHost||!A)return;A.members=A.members||{};const ks=b.dataset.mset.split(',');const v=b.dataset.v;
+    const cur=ks.map(k=>(A.members[k]||{}).perm||'');const same=cur.every(p=>p===v);ks.forEach(k=>{if(same)delete A.members[k];else A.members[k]={perm:v};});writeAccess();renderTeam();});
+  el.querySelectorAll('[data-mapprove2]').forEach(b=>b.onclick=()=>{if(!isHost||!A)return;A.members=A.members||{};b.dataset.mapprove2.split(',').forEach(k=>{A.members[k]={perm:'edit'};});writeAccess();renderTeam();toast('편집을 허용했어요');});
+  const t=el.querySelector('#memOldT');if(t)t.onclick=()=>{memOld=!memOld;renderTeam();};
+  const c=el.querySelector('#memClean');if(c)c.onclick=()=>{const g=memberGroups();const ks=[].concat(...g.old.filter(r=>!r.perm||r.perm==='').map(r=>r.keys));
+    if(!ks.length){toast('정리할 기록이 없어요 (권한을 따로 정한 사람은 남겨 둬요)');return;}
+    askConfirm('접속하지 않은 오래된·이름 없는 기록 '+ks.length+'개를 목록에서 뺄까요? 설계 내용은 그대로이고, 다시 들어오면 다시 나타나요.','정리').then(ok=>{if(!ok)return;ks.forEach(k=>{delete fireMembers[k];backend.delDoc('members',k).catch(()=>{});});renderTeam();toast(ks.length+'개 정리했어요');});};
+}
+
 /* ---- empty-state & migration ---- */
 function checkEmpty(){
   const card=$('#emptyCard');
@@ -3245,6 +3385,7 @@ function renderMultiHelpers(){
 function multiDelete(){
   const ids=[...multi].filter(id=>{const it=getItem(id);return it&&canEditItem(it);});if(!ids.length){toast('지울 수 있는 항목이 없어요 (잠긴 항목 제외)');return;}
   if(ids.length>3&&arguments[0]!==true){askConfirm(ids.length+'개를 지울까요? 되돌리기로 복구할 수 있어요.','지우기',true).then(ok=>{if(ok)multiDelete(true);});return;}
+  if(ids.length>=5)safeBackup('pre','여러 개 삭제 직전');
   const changes=ids.map(id=>({id,before:clone(getItem(id)),after:null}));
   state.items=state.items.filter(i=>!ids.includes(i.id));ids.forEach(id=>{removeObj(id);persist(id,true);multi.delete(id);});
   pushHist({changes});renderMultiHelpers();renderQuick();renderEditor();uiChanged();toast(ids.length+'개 삭제했어요','되돌리기',undo);
@@ -3620,7 +3761,8 @@ async function renderTeam(){
   if(backend&&backend.kind==='claude'){const ids=[...new Set(state.items.map(i=>i.by).concat(state.board.map(m=>m.by)).filter(Boolean))];await resolveProfiles(ids);}
   if(curTab==='team'){boardSeen=Date.now();try{localStorage.setItem('bf-board-seen',String(boardSeen));}catch(e){}}
   updateTeamBadge();
-  let h='<h3>공유</h3>'+collabHTML()+hostPanelHTML()+plansHTML();
+  if(backend&&backend.kind==='fire'&&(!bkIndex||Date.now()-bkIndexAt>120000)&&!bkStatusLoad._p){bkStatusLoad._p=1;bkStatusLoad().finally(()=>{bkStatusLoad._p=0;});}
+  let h='<h3>공유</h3>'+collabHTML()+bkStatusHTML()+hostPanelHTML()+plansHTML();
   if(mode==='shared'&&backend&&backend.kind==='fire')h+='<div class="merow"><span>나: <b>'+esc(nick||'이름 없음')+'</b>'+(myRole?' · <span class="rolepill">'+esc(myRole)+'</span>':'')+'</span><button class="btn" id="meEdit">이름·역할 바꾸기</button></div>';
   // people
   const people=peersN.filter(p=>!p.self);
@@ -3649,7 +3791,7 @@ async function renderTeam(){
   // fill user-provided text safely
   el.querySelectorAll('[data-pn]').forEach(x=>{const p=peersN.find(q=>q.key===x.dataset.pn);x.textContent=p?(p.name||'친구'):'친구';});
   el.querySelectorAll('[data-mn]').forEach(x=>{const m=state.board.find(q=>q.id===x.dataset.mn);if(!m)return;x.textContent=whoName(m.by,m.name)||'익명';x.parentNode.nextSibling.textContent=m.text;});
-  bindCollab();bindHost(el);bindPlans(el);
+  bindCollab();bindHost(el);bindPlans(el);bindBkStatus(el);
   {const me=el.querySelector('#meEdit');if(me)me.onclick=()=>askNick(false);}
   el.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>{const it=getItem(b.dataset.goto);if(!it){toast('지워진 항목이에요');return;}select(it.id,false);focusItem(it);if(window.innerWidth<900)foldSheet(true);}));
   el.querySelectorAll('[data-follow]').forEach(b=>b.addEventListener('click',()=>{setFollow(followKey===b.dataset.follow?null:b.dataset.follow);renderTeam();}));
@@ -4305,7 +4447,8 @@ function renderSettings(){
   $('#resetFx').addEventListener('click',()=>{if(readOnly)return;defaultFixtures().forEach(f=>{const i=state.items.findIndex(x=>x.id===f.id);if(i>=0)state.items[i]=f;else state.items.push(f);refreshItem(f.id);persist(f.id,true);});uiChanged();toast('기존 요소를 처음 위치로 되돌렸어요');});
   $('#resetAll').addEventListener('click',()=>{if(readOnly)return;
     if(mode==='shared'&&backend&&backend.kind==='fire'&&fireAccess&&fireAccess.hostHash&&!isHost){toast('“모두 지우기”는 관리자만 할 수 있어요');return;}
-    askConfirm(mode==='shared'?'함께 작업하는 모두의 구역·칸막이·소품이 지워져요. 정말 지울까요?':'구역·칸막이·소품을 모두 지울까요?','모두 지우기',true).then(ok=>{if(!ok)return;
+    askConfirm(mode==='shared'?'함께 작업하는 모두의 구역·칸막이·소품이 지워져요. 직전 상태는 서버에 자동 백업돼요. 정말 지울까요?':'구역·칸막이·소품을 모두 지울까요?','모두 지우기',true).then(async ok=>{if(!ok)return;
+    emergencyLocal('모두 지우기 직전');if(mode==='shared'){const okb=await safeBackup('pre','모두 지우기 직전');if(!okb){toast('백업이 안 돼서 지우지 않았어요. 잠시 후 다시 해 주세요');return;}}
     state.items.filter(i=>i.cat!=='fixture').forEach(i=>{removeObj(i.id);});const gone=state.items.filter(i=>i.cat!=='fixture').map(i=>i.id);
     state.items=state.items.filter(i=>i.cat==='fixture');gone.forEach(id=>persist(id,true));hist=[];redoSt=[];updUndo();select(null);uiChanged();toast('설계를 지웠어요');});});
 }
