@@ -242,15 +242,20 @@ table.sched th{position:sticky;top:0;background:var(--panel2);font-weight:700}
 #rotBtn[hidden],#movePad[hidden]{display:none}
 #padOpen{position:absolute;right:10px;bottom:118px;z-index:4;border:0;border-radius:999px;background:rgba(20,20,24,.78);color:#fff;font-weight:800;font-size:13px;padding:10px 14px;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 #padOpen[hidden]{display:none}
-#movePad .hval{flex-direction:column;background:#1d4ed8!important;color:#fff!important;font-size:15px!important}
+#movePad .hval{flex-direction:column;background:#1d4ed8!important;color:#fff!important;font-size:12px!important}
+#movePad.lg button{font-size:20px;border-radius:12px}#movePad.lg .hval{font-size:15px!important}#movePad.lg [data-mp=step]{font-size:12px}
+#movePad:not(.lg) .hval small{font-size:8px;margin:0}#movePad:not(.lg) .hval small:last-child{display:none}
 #movePad .hval small{font-size:9px;opacity:.9;margin:0}
 #movePad .mph{background:#dbeafe!important;color:#1d4ed8!important}
-#movePad .mpmin{font-size:11px!important;background:rgba(255,255,255,.55)!important}
+#movePad .mpmin{font-size:10px!important;background:rgba(255,255,255,.55)!important}
 #movePad.noh .mph{visibility:hidden}
-#movePad{position:absolute;right:8px;bottom:112px;z-index:4;display:grid;grid-template-columns:repeat(3,44px) 54px;grid-auto-rows:44px;gap:5px;padding:6px;background:rgba(20,20,24,.55);border-radius:16px;backdrop-filter:blur(4px);touch-action:none}
-#movePad button{border:0;border-radius:12px;background:rgba(255,255,255,.92);color:#111;font-size:20px;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;user-select:none;-webkit-user-select:none}
+#movePad{position:absolute;right:6px;bottom:104px;z-index:4;display:grid;grid-template-columns:repeat(3,32px) 40px;grid-auto-rows:32px;gap:3px;padding:4px;background:rgba(20,20,24,.38);border-radius:12px;backdrop-filter:blur(3px);touch-action:none;opacity:.82;transition:opacity .15s}
+#movePad:active,#movePad.lg{opacity:1}
+#movePad.lg{grid-template-columns:repeat(3,44px) 54px;grid-auto-rows:44px;gap:5px;padding:6px;border-radius:16px;background:rgba(20,20,24,.55)}
+#movePad.left{right:auto;left:6px}
+#movePad button{border:0;border-radius:9px;background:rgba(255,255,255,.9);color:#111;font-size:16px;padding:0;font-weight:900;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;user-select:none;-webkit-user-select:none}
 #movePad button small{font-size:9px;font-weight:700;margin-top:2px}
-#movePad [data-mp=step]{font-size:12px;background:#2f5d4a;color:#fff}
+#movePad [data-mp=step]{font-size:10px;background:#2f5d4a;color:#fff}
 #movePad button:active{transform:scale(.93)}
 #movePad .mpr[hidden]{visibility:hidden;display:flex}
 body[data-mode=tour] #rotBtn,body[data-mode=present] #rotBtn{display:none!important}
@@ -2029,7 +2034,7 @@ function bindHost(el){
 /* =========================================================
    app version check + server-side automatic backups (Firebase)
    ========================================================= */
-const APP_VERSION='2026.10.13-20';
+const APP_VERSION='2026.10.13-21';
 let updShown=false;
 async function checkUpdate(){
   if(inClaude||updShown||!/^https?:$/.test(location.protocol))return;
@@ -2615,11 +2620,13 @@ function setMapMode(v){mapMode=!!v;applyCamMode();}
 /* ---------- on-screen move pad (touch) ---------- */
 let padStep=+lsGet('bf-padstep')||10;
 function coarse(){return window.matchMedia('(pointer:coarse)').matches||window.innerWidth<900;}
+function padSelVal(){return settings.movePad===false?'off':settings.padSize==='l'?'l':settings.padSide==='l'?'sl':'s';}
 function updateMovePad(){
   const pad=$('#movePad');if(!pad)return;const it=selId&&getItem(selId);
   const show=it&&!multi&&!readOnly&&canEditItem(it)&&coarse()&&!tour&&settings.mode!=='present'&&!placeKey&&!draw&&settings.movePad!==false;
   const mini=lsGet('bf-padmin')==='1';$('#padOpen').hidden=!(show&&mini);
   pad.hidden=!show||mini;if(!show||mini)return;
+  pad.classList.toggle('lg',settings.padSize==='l');pad.classList.toggle('left',settings.padSide==='l');
   pad.querySelector('[data-mp=step]').textContent=padStep+'cm';
   pad.querySelectorAll('.mpr').forEach(x=>x.hidden=!(it.type==='box'));updatePadHeight();
 }
@@ -2695,6 +2702,7 @@ function sendGame(){
 }
 /* ----- update log (shown in 설정 and after an update) ----- */
 const CHANGELOG=[
+  ['2026.10.13-21','10/13',['휴대폰 이동 패드를 작게 (화면 가림 절반 이하), 설정 → 휴대폰 이동 패드에서 크게·왼쪽·끄기 선택']],
   ['2026.10.13-20','10/13',['조명이 너무 밝던 문제: 빛이 실제 LED처럼 1~2m 안에서만 퍼지게, 🌙 불 끄기 화면 왼쪽 위에 “모든 조명” 밝기 조절 (내 화면만)','조명마다 밝기·깜빡임·빛 색을 편집 탭에서 조절','🕵️ 숨은 방: 구역을 숨은 방으로 지정하면 손님이 들어올 틈·넘겨볼 수 있는 낮은 벽·새는 조명을 현황 탭에서 검사','비밀 커튼(직원·귀신만): 손님 동선 검사에선 벽으로 계산','설치 도면 새로 만듦: 종류별 색과 기호표, 이름 표시, 같은 물건은 번호 하나로 묶기, 입구·출구·방향·축척, 천장·조명 도면 따로, 목록을 종류별로','도면에서 돌려 놓은 물건 각도가 틀리게 그려지던 문제 수정']],
   ['2026.10.12-19','10/12',['동선 검사 다시 계산: 얇은 비닐 벽도 벽으로 인식 (초록 선이 벽을 뚫던 문제 해결), 폭은 벽·물건까지 실제 거리로 5cm 단위 측정','초록 선이 벽에 붙지 않고 통로 가운데로 그려짐']],
   ['2026.10.07-18','10/7',['백업 강화: 하루 첫 백업은 날짜별 영구 보관, 새 버전 처음 열 때·여러 개 삭제·모두 지우기 직전 자동 백업, 10분 간격·60개 보관','함께 탭에 누구나 볼 수 있는 백업 상태 + 지금 백업 + 내 기기에 저장','휴대폰 이동 패드에 높이 조절(바닥에서 높이 ⇄ 물건 키, 천장 물건 포함), 패드 접기','빠른 버튼 정리(⋯ 더보기), 목록 개수 배지 회색으로','참여자 목록: 접속 중/최근/오래된 기록으로 묶고 같은 이름 합치기, 편집·보기·막기 버튼, 오래된 기록 한 번에 정리']],
@@ -4582,7 +4590,7 @@ function renderSettings(){
   const el=$('#pane-set');const r=state.room;
   const W=r.front+r.fStepW,D=r.left+r.pillarD,corr=D-r.fStepD-r.bStepD,e2=W-r.pillarW-r.back;
   let h='<div class="row" style="margin-top:0"><button class="btn" data-clog="1">📜 업데이트 기록 · '+APP_VERSION+'</button></div><h3>모드</h3><div class="row"><button class="btn primary" id="modePick">'+MODES[settings.mode].icon+' 지금: '+MODES[settings.mode].label+' 모드 — 바꾸기</button></div>';
-  h+='<div class="g2"><label class="f"><span>글자 크기</span><select id="uiSel">'+[[1,'보통'],[1.12,'크게'],[1.25,'아주 크게']].map(([v,l])=>'<option value="'+v+'"'+(+settings.uiScale===v?' selected':'')+'>'+l+'</option>').join('')+'</select></label><span></span></div>';
+  h+='<div class="g2"><label class="f"><span>글자 크기</span><select id="uiSel">'+[[1,'보통'],[1.12,'크게'],[1.25,'아주 크게']].map(([v,l])=>'<option value="'+v+'"'+(+settings.uiScale===v?' selected':'')+'>'+l+'</option>').join('')+'</select></label><label class="f"><span>휴대폰 이동 패드</span><select id="padSel">'+[['s','작게'],['l','크게'],['sl','작게 · 왼쪽'],['off','끄기']].map(([v,l])=>'<option value="'+v+'"'+(padSelVal()===v?' selected':'')+'>'+l+'</option>').join('')+'</select></label></div>';
   h+='<h3>전문가 모드 설정</h3>'+(isExpert()?'<div class="row"><button class="btn" id="schedBtn">자재 배치표 (좌표 목록)</button></div><label class="tg"><span>바닥 좌표 눈금<small>원점과 2m마다 숫자</small></span><input type="checkbox" id="rulerCk"'+(settings.rulers!==false?' checked':'')+'></label><label class="tg"><span>모든 물품에 좌표 표시<small>바닥·천장 물품 위에 (가로, 세로) 좌표를 띄워요</small></span><input type="checkbox" id="coordCk"'+(settings.coordLabels?' checked':'')+'></label>':'<p class="note">전문가 모드를 켜면 단위·좌표 눈금·좌표로 놓기·배치표를 쓸 수 있어요.</p>');
   h+='<div class="g2"><label class="f"><span>단위 (전문가 모드)</span><select id="unitSel"'+(isExpert()?'':' disabled')+'>'+['mm','cm','m'].map(u=>'<option'+(settings.unit===u?' selected':'')+'>'+u+'</option>').join('')+'</select></label>'+
      '<label class="f"><span>격자 간격</span><select id="stepSel">'+[1,2,5,10,25,50].map(v=>'<option value="'+v+'"'+(+settings.snapStep===v?' selected':'')+'>'+v+'cm</option>').join('')+'</select></label></div>';
@@ -4608,6 +4616,7 @@ function renderSettings(){
   }));
   $('#modePick').addEventListener('click',showModePicker);
   $('#uiSel').addEventListener('change',e=>{settings.uiScale=+e.target.value;saveSettings();applyUiScale();});
+  $('#padSel').addEventListener('change',e=>{const v=e.target.value;settings.movePad=v!=='off';if(v!=='off'){settings.padSize=v==='l'?'l':'s';settings.padSide=v==='sl'?'l':'r';}saveSettings();updateMovePad();});
   {const sb=$('#schedBtn');if(sb)sb.addEventListener('click',scheduleModal);const rc=$('#rulerCk');if(rc)rc.addEventListener('change',()=>{settings.rulers=rc.checked;saveSettings();updateRulers();});const cc=$('#coordCk');if(cc)cc.addEventListener('change',()=>{settings.coordLabels=cc.checked;saveSettings();updateRulers();});}
   $('#unitSel').addEventListener('change',e=>{settings.unit=e.target.value;saveSettings();renderEditor();updateDims();updateRulers();});
   $('#stepSel').addEventListener('change',e=>{settings.snapStep=+e.target.value;saveSettings();});
