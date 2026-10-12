@@ -1001,7 +1001,7 @@ function floorTexture(){
   const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=renderer.capabilities.getMaxAnisotropy();return t;
 }
 let floorMesh=null;
-function applyDimVis(){dimGroup.visible=!!settings.dims;const ex=typeof isExpert==='function'&&isExpert();dimGroup.children.forEach(c=>{c.visible=!(ex&&c.userData.len);});}
+function applyDimVis(){dimGroup.visible=!!settings.dims&&!settings.dark;const ex=typeof isExpert==='function'&&isExpert();dimGroup.children.forEach(c=>{c.visible=!(ex&&c.userData.len);});}
 function buildRoom(){
   clearGroup(roomGroup);clearGroup(dimGroup);clearGroup(ceilGroup);walls=[];
   const wallC=new THREE.Color(css('--wall')),lineC=new THREE.Color(css('--wall-line'));
@@ -1240,13 +1240,15 @@ function buildItemObj(it){
     const lm=new THREE.LineBasicMaterial({color:col,transparent:true});g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(lp),lm));mats.push({m:lm,base:1});
     const c=polyCentroid(it.pts);labelPos=V(c.x/100,y0+(it.lvl==='ceil'?-0.08:0.05),c.z/100);if(isSecret(it))label='🕵️ '+it.name+' (손님 X)';
   }else if(it.type==='path'){
-    const m=MB(col,{op:.95});
+    const m=MB(col,{op:.5});let carry=60;
     for(let i=1;i<it.pts.length;i++){
       const a=it.pts[i-1],b=it.pts[i];const dx=b.x-a.x,dz=b.z-a.z,L=Math.hypot(dx,dz);if(L<1)continue;const ry=Math.atan2(-dz,dx);
-      add(BX(L,1,9),m.clone(),(a.x+b.x)/2,1.2,(a.z+b.z)/2,{y:ry});
-      const cone=new THREE.ConeGeometry(0.11,0.24,3);cone.rotateZ(-Math.PI/2);add(cone,m.clone(),a.x+dx*0.55,2,a.z+dz*0.55,{y:ry});
+      add(BX(L,0.6,3.5),m.clone(),(a.x+b.x)/2,1.2,(a.z+b.z)/2,{y:ry});
+      // one small chevron every ~1.5m of walking, not one per segment
+      for(let t=carry;t<L;t+=150){const cone=new THREE.ConeGeometry(0.06,0.13,3);cone.rotateZ(-Math.PI/2);add(cone,m.clone(),a.x+dx*t/L,2,a.z+dz*t/L,{y:ry});}
+      carry=((carry-L)%150+150)%150;
     }
-    const s0=it.pts[0];labelPos=V(s0.x/100,0.05,s0.z/100);label=it.name+' · 출발';
+    const s0=it.pts[0];labelPos=V(s0.x/100,0.05,s0.z/100);label='출발';
   }else{
     // box & wall items share one shape language: origin bottom-centre, front = +z
     if(it.type==='wall')body.position.y=-h/200;
@@ -1360,7 +1362,7 @@ function buildItemObj(it){
    else if(it.type==='line'){const [a,b]=it.pts;const dx=b.x-a.x,dz=b.z-a.z;addProxy(BX(Math.max(5,Math.hypot(dx,dz)),Math.max(it.h,12),Math.max(it.t,18)),(a.x+b.x)/2,(it.y||0)+it.h/2,(a.z+b.z)/2,Math.atan2(-dz,dx));}
    else if(it.type==='path'){for(let i=1;i<it.pts.length;i++){const a=it.pts[i-1],b=it.pts[i];const dx=b.x-a.x,dz=b.z-a.z,L=Math.hypot(dx,dz);if(L<1)continue;addProxy(BX(L,10,32),(a.x+b.x)/2,5,(a.z+b.z)/2,Math.atan2(-dz,dx));}}}
   const fx=it.cat==='fixture';
-  const wantLabel=settings.labels&&(it.preset==='pin'||it.cat==='zone'||it.type==='region'||it.type==='path'||(fx&&settings.fixtureLabels&&!isExpert())||(it.cat==='prop'&&settings.propLabels));
+  const wantLabel=settings.labels&&(it.preset==='pin'||it.cat==='zone'||it.type==='region'||it.type==='path'||(fx&&settings.fixtureLabels&&!isExpert()&&!settings.dark)||(it.cat==='prop'&&settings.propLabels));
   if(labelPos&&wantLabel){
     const sp=makeLabel(label,{size:fx?0.026:0.03,weight:fx?500:700,border:fx?css('--line'):'#'+col.getHexString(),ink:fx?css('--muted'):css('--ink')});
     sp.userData.prio=fx?1:(isZone||it.type==='region'||it.type==='path'||it.preset==='pin')?3:2;
@@ -1396,7 +1398,7 @@ function updateSel(){
   }
 }
 function select(id,openEdit){
-  selId=id||null;updateSel();updateDims();renderEditor();renderList();renderQuick();if(replaceFor&&replaceFor!==selId)cancelReplace();
+  selId=id||null;updateSel();updateDims();updateChain();renderEditor();renderList();renderQuick();if(replaceFor&&replaceFor!==selId)cancelReplace();
   setPresence({sel:selId});
   if(selId&&openEdit)showTab('edit',true);
 }
@@ -1452,6 +1454,7 @@ function styleHalo(hs){const g=lightGain(),k=hs.userData.hs||0.4;const sc=k*(0.3
 const LIGHT_DEF={light:1.5,string:1.3,bulb:1.2,tube:1.4,spot:1.1,candle:0.7,lantern:0.9,exit:0.35};
 function lightShape(it){const sh=it.shape||(PRESETS[it.preset]||{}).shape;return LIGHT_DEF[sh]!=null?sh:null;}
 function lightDef(it){const pr=PRESETS[it.preset]||{};return pr.lightPow||LIGHT_DEF[lightShape(it)]||1;}
+let fxLabelDark=null;
 function applyDark(){
   const d=!!settings.dark;
   const lw=d?clamp(+settings.leakWin||0,0,1):0,lc=d?clamp(+settings.leakCorr||0,0,1):0;
@@ -1462,7 +1465,7 @@ function applyDark(){
   scene.fog=d?new THREE.Fog(0x050507,8,20):null;
   const lg=lightGain();objs.forEach(o=>{(o.lights||[]).forEach(l=>{l.L.intensity=d?l.base*lg:0;});(o.halos||[]).forEach(hs=>{hs.visible=d&&lg>0.01;styleHalo(hs);});
     const it=o.it;if(it.mat==='glass'&&o.mats[0]&&o.mats[0].m.emissive){const leak=it.seg===3?lc:lw;o.mats[0].m.emissive.set(d?(it.seg===3?'#ffe0b0':'#bcd0ff'):'#000000');o.mats[0].m.emissiveIntensity=d?leak*0.9:0;}});
-  const b=$('#darkBtn');if(b)b.classList.toggle('on',d);
+  const b=$('#darkBtn');if(b)b.classList.toggle('on',d);if(typeof applyDimVis==='function')applyDimVis();if(fxLabelDark!==d){fxLabelDark=d;if(objs.size)rebuildItems();}
   const dp=$('#darkPanel');if(dp){dp.hidden=!d||settings.mode==='present'||!!tour;$('#leakWin').value=String(Math.round((+settings.leakWin||0)*100));$('#leakCorr').value=String(Math.round((+settings.leakCorr||0)*100));$('#lightGain').value=String(Math.round(lightGain()*100));$('#lightGainV').textContent=Math.round(lightGain()*100)+'%';$('#shadowCk').checked=settings.shadows!==false;}
 }
 function animateLights(now){
@@ -2035,7 +2038,7 @@ function bindHost(el){
 /* =========================================================
    app version check + server-side automatic backups (Firebase)
    ========================================================= */
-const APP_VERSION='2026.10.13-22';
+const APP_VERSION='2026.10.13-23';
 let updShown=false;
 async function checkUpdate(){
   if(inClaude||updShown||!/^https?:$/.test(location.protocol))return;
@@ -2165,7 +2168,7 @@ function declutter(now){
   });
   list.sort((a,b)=>(b.pr-a.pr)||(a.z-b.z));
   const placed=[];
-  list.forEach(l=>{const hit=placed.some(q=>l.x<q.x+q.w+3&&q.x<l.x+l.w+3&&l.y<q.y+q.h+2&&q.y<l.y+l.h+2);l.sp.material.visible=!hit;if(!hit)placed.push(l);});
+  list.forEach(l=>{const hit=placed.some(q=>l.x<q.x+q.w+10&&q.x<l.x+l.w+10&&l.y<q.y+q.h+6&&q.y<l.y+l.h+6);l.sp.material.visible=!hit;if(!hit)placed.push(l);});
   cam.getWorldDirection(_dd);const top=_dd.y<-0.9&&!tour;
   objs.forEach(o=>{const s=o.group.userData.strip;if(s)s.visible=top;});
 }
@@ -2248,7 +2251,7 @@ function computeRoute(){
   const thin=sm.filter((_,i)=>i%2===0||i===sm.length-1);
   return {width,reach:true,path:thin,neck:{x:x0+(neck%nx+.5)*C,z:z0+(Math.floor(neck/nx)+.5)*C},src:E.src,ends:E,len:path.length*C,grid:{clr,blk,nx,nz,x0,z0,C,sa}};
 }
-function scheduleRoute(){clearTimeout(routeT);routeT=setTimeout(()=>{routeRes=computeRoute();drawRoute();},500);}
+function scheduleRoute(){clearTimeout(routeT);routeT=setTimeout(()=>{routeRes=computeRoute();drawRoute();if(curTab==='game'){const pg=$('#pane-game');if(!(pg&&pg.contains(document.activeElement)))renderGame();}},500);}
 function drawRoute(){
   clearGroup(routeGroup);const on=(routeShow||settings.mode==='check')&&!tour&&routeRes;if(!on)return;
   const r=routeRes,good=r.reach&&r.width>=ROUTE_NEED,col=new THREE.Color(!r.reach?'#e5484d':good?'#2fb344':'#f2b705');
@@ -2734,6 +2737,7 @@ function sendGame(){
 }
 /* ----- update log (shown in 설정 and after an update) ----- */
 const CHANGELOG=[
+  ['2026.10.13-23','10/13',['3D 화면 정리: 관람 동선을 가늘고 반투명하게, 화살표는 1.5m마다 작게','문제→힌트 순서 화살표는 카드를 골랐을 때 그 카드 것만 (현황 탭에서 “모두 보기” 가능)','불 끈 화면에서는 기존 요소 이름·벽 길이 표시를 숨김','라벨이 겹치면 덜 중요한 것부터 숨김 (여유 간격 넓힘)']],
   ['2026.10.13-22','10/13',['팀 메모판: 오래된 메모가 화면에서 사라지던 문제 (최근 60개만 보이던 것) — “이전 메모 더 보기”','메모를 지우면 휴지통으로 가고 관리자가 되살릴 수 있어요','팀 메모판도 서버 백업·내보내기에 포함','백업 “골라서”: 백업과 지금을 비교해 사라진 항목·지워진 설명·팀 메모만 골라 되살리기 (지금 것은 안 지움)','데이터 가져오기 직전에도 서버 자동 백업']],
   ['2026.10.13-21','10/13',['휴대폰 이동 패드를 작게 (화면 가림 절반 이하), 설정 → 휴대폰 이동 패드에서 크게·왼쪽·끄기 선택']],
   ['2026.10.13-20','10/13',['조명이 너무 밝던 문제: 빛이 실제 LED처럼 1~2m 안에서만 퍼지게, 🌙 불 끄기 화면 왼쪽 위에 “모든 조명” 밝기 조절 (내 화면만)','조명마다 밝기·깜빡임·빛 색을 편집 탭에서 조절','🕵️ 숨은 방: 구역을 숨은 방으로 지정하면 손님이 들어올 틈·넘겨볼 수 있는 낮은 벽·새는 조명을 현황 탭에서 검사','비밀 커튼(직원·귀신만): 손님 동선 검사에선 벽으로 계산','설치 도면 새로 만듦: 종류별 색과 기호표, 이름 표시, 같은 물건은 번호 하나로 묶기, 입구·출구·방향·축척, 천장·조명 도면 따로, 목록을 종류별로','도면에서 돌려 놓은 물건 각도가 틀리게 그려지던 문제 수정']],
@@ -4117,14 +4121,15 @@ const chainGroup=new THREE.Group();scene.add(chainGroup);
 function itemCenter(it){const o=objs.get(it.id);if(!o)return null;const b=itemBox(o);if(b.isEmpty())return null;const c=b.getCenter(V(0,0,0));c.y=b.max.y+0.06;return c;}
 function updateChain(){
   clearGroup(chainGroup);
-  if(!state.game||state.game.showChain===false||tour)return;
-  const st=stations();const quizzes=st.filter(i=>i.kind==='quiz'),hints=st.filter(i=>i.kind==='hint'),goals=st.filter(i=>i.kind==='goal');
+  if(!state.game||tour)return;
+  const st=stations();const all=!!settings.chainAll,sel=selId&&st.find(i=>i.id===selId);if(!all&&!sel)return;const quizzes=st.filter(i=>i.kind==='quiz'),hints=st.filter(i=>i.kind==='hint'),goals=st.filter(i=>i.kind==='goal');
   const arrow=(a,b,color)=>{const pa=itemCenter(a),pb=itemCenter(b);if(!pa||!pb)return;const mid=pa.clone().add(pb).multiplyScalar(0.5);mid.y=Math.max(pa.y,pb.y)+0.35;
     const curve=new THREE.QuadraticBezierCurve3(pa,mid,pb);const g=new THREE.BufferGeometry().setFromPoints(curve.getPoints(24));
-    const l=new THREE.Line(g,new THREE.LineDashedMaterial({color,dashSize:0.08,gapSize:0.05,depthTest:false,transparent:true,opacity:.9}));l.computeLineDistances();l.renderOrder=992;chainGroup.add(l);
+    const l=new THREE.Line(g,new THREE.LineDashedMaterial({color,dashSize:0.08,gapSize:0.05,depthTest:false,transparent:true,opacity:all?.55:.9}));l.computeLineDistances();l.renderOrder=992;chainGroup.add(l);
     const tip=curve.getPoint(0.9),dir=curve.getTangent(0.9);const cone=new THREE.Mesh(new THREE.ConeGeometry(0.035,0.11,8),new THREE.MeshBasicMaterial({color,depthTest:false}));cone.position.copy(tip);cone.quaternion.setFromUnitVectors(V(0,1,0),dir.normalize());cone.renderOrder=992;chainGroup.add(cone);};
-  quizzes.forEach(q=>{const h=hints.find(x=>+x.num===+q.gives);if(h)arrow(q,h,new THREE.Color('#ff6b6b'));});
-  if(goals.length)hints.forEach(h=>arrow(h,goals[0],new THREE.Color('#4dabf7')));
+  const on=(a,b)=>all||a===sel||b===sel;
+  quizzes.forEach(q=>{const h=hints.find(x=>+x.num===+q.gives);if(h&&on(q,h))arrow(q,h,new THREE.Color('#ff6b6b'));});
+  if(goals.length)hints.forEach(h=>{if(on(h,goals[0]))arrow(h,goals[0],new THREE.Color('#4dabf7'));});
 }
 /* ----- seed stations exactly as written in the minutes ----- */
 function seedFromMinutes(force){
@@ -4225,7 +4230,7 @@ function renderGame(){
    h+='<details class="sec"><summary>🧩 문제·힌트 카드 배치 <em>'+sts.length+'개</em></summary>';
    h+=qz.map(q=>{const hh=hs.find(x=>+x.num===+q.gives);return '<div class="chain"><button class="tname" data-goto="'+esc(q.id)+'">문제 '+circ(q.num)+'</button><small>'+esc(nearName(q))+'</small><span class="arr">→</span>'+(hh?'<button class="tname" data-goto="'+esc(hh.id)+'">힌트 '+circ(hh.num)+'</button><small>'+esc(nearName(hh))+'</small>':'<span class="warn">힌트 '+circ(q.gives)+' 없음</span>')+'</div>';}).join('');
    if(gl.length)h+='<div class="chain"><span>힌트를 모으면 →</span><button class="tname" data-goto="'+esc(gl[0].id)+'">🎁 '+esc(gl[0].name)+'</button></div>';
-   h+='<div class="row"><button class="btn" id="gSeed"'+ro+'>회의록대로 배치하기</button></div><label class="tg"><span>3D에 순서 화살표</span><input type="checkbox" id="gChain"'+(g.showChain!==false?' checked':'')+'></label></details>';}
+   h+='<div class="row"><button class="btn" id="gSeed"'+ro+'>회의록대로 배치하기</button></div><label class="tg"><span>3D에 순서 화살표 모두 보기<small>끄면 문제·힌트 카드를 골랐을 때 그 카드 것만 보여요 (내 화면만)</small></span><input type="checkbox" id="gChain"'+(settings.chainAll?' checked':'')+'></label></details>';}
   h+='<details class="sec"><summary>📝 회의록 아이디어</summary><textarea data-g="ideas" rows="7"'+ro+'>'+esc(g.ideas)+'</textarea></details>';
   h+='<div class="row"><button class="btn primary" id="gCopy">진행 현황 텍스트로 복사</button></div>';
   el.innerHTML=h;
@@ -4233,7 +4238,7 @@ function renderGame(){
   on('gSeed',()=>seedFromMinutes(false));
   on('gCopy',()=>{const t=gamePlanText();modal('진행 현황','<textarea readonly style="min-height:300px">'+esc(t)+'</textarea><div class="row"><button class="btn primary" id="cp">복사</button></div>',b=>{b.querySelector('#cp').onclick=()=>copyText(t,b.querySelector('textarea'));});});
   on('pAdd',()=>{if(readOnly)return;g.purchases=getPurchases().map(x=>Object.assign({},x));g.purchases.push({key:'',name:'',unit:0,qty:1,ship:0,measure:'none'});writeGame();renderGame();});
-  const gc=el.querySelector('#gChain');if(gc)gc.addEventListener('change',()=>{g.showChain=gc.checked;writeGame();});
+  const gc=el.querySelector('#gChain');if(gc)gc.addEventListener('change',()=>{settings.chainAll=gc.checked;saveSettings();updateChain();});
   el.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>{const it=getItem(b.dataset.goto);if(!it)return;select(it.id,false);focusItem(it);if(window.innerWidth<900)foldSheet(true);}));
   el.querySelectorAll('[data-p]').forEach(inp=>inp.addEventListener('input',()=>{if(readOnly)return;g.purchases=getPurchases().map(x=>Object.assign({},x));const [i,k]=inp.dataset.p.split('.');
     if(k==='name'||k==='buyer')g.purchases[+i][k]=inp.value.slice(0,k==='name'?80:30);else{const v=parseFloat(inp.value);if(!isFinite(v)||v<0)return;g.purchases[+i][k]=v;}
