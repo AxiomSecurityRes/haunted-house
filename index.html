@@ -154,6 +154,7 @@ input.bad{border-color:var(--danger)!important;background:rgba(192,57,43,.08)!im
 #darkPanel{position:absolute;left:8px;top:8px;z-index:3;background:rgba(12,12,16,.82);color:#fff;border-radius:8px;padding:8px 10px;font-size:12.5px;display:flex;flex-direction:column;gap:4px;min-width:170px}
 #darkPanel[hidden]{display:none}
 .secbox{margin:6px 0 10px;display:flex;flex-direction:column;gap:6px}
+.picklist{max-height:55vh;overflow:auto}.picklist small{word-break:break-all}
 #darkPanel label{display:flex;align-items:center;gap:6px;justify-content:space-between}
 #darkPanel input[type=range]{width:100px;accent-color:#9db8ff}
 #darkPanel .ck{justify-content:flex-start}
@@ -2034,7 +2035,7 @@ function bindHost(el){
 /* =========================================================
    app version check + server-side automatic backups (Firebase)
    ========================================================= */
-const APP_VERSION='2026.10.13-21';
+const APP_VERSION='2026.10.13-22';
 let updShown=false;
 async function checkUpdate(){
   if(inClaude||updShown||!/^https?:$/.test(location.protocol))return;
@@ -2057,7 +2058,7 @@ async function bkReq(path,method,body){
   if(!r.ok){const e=new Error('http '+r.status);e.status=r.status;if(r.status===401||r.status===403)bkRulesOk=false;throw e;}
   return (!method||method==='GET')?r.json():null;
 }
-function snapshot(){return {v:1,app:APP_VERSION,at:Date.now(),items:state.items.map(clone),catalog:state.catalog.map(clone),room:Object.assign({},state.room),game:state.game?clone(state.game):null};}
+function snapshot(){return {v:1,app:APP_VERSION,at:Date.now(),items:state.items.map(clone),catalog:state.catalog.map(clone),room:Object.assign({},state.room),game:state.game?clone(state.game):null,board:state.board.map(clone)};}
 async function serverBackup(kind,label){
   if(!backend||backend.kind!=='fire'||bkBusy)return false;bkBusy=true;
   try{const id=Date.now().toString(36)+randCode(4);const data=snapshot();const json=JSON.stringify(data);
@@ -2076,14 +2077,44 @@ setInterval(async()=>{
     if(latest&&Date.now()-latest.at<BK_EVERY){bkLast=latest.at;return;}   // someone else just backed up
     await serverBackup('auto');if(isHost&&curTab==='team')renderTeam();}catch(e){}
 },60000);
+// Firebase can hand arrays back as {"0":…,"1":…}; accept both
+function fbArr(v){return Array.isArray(v)?v.filter(x=>x!=null):(v&&typeof v==='object')?Object.keys(v).sort((a,b)=>a-b).map(k=>v[k]).filter(x=>x!=null):null;}
+function fbBackup(d){if(!d||typeof d!=='object')return d;['items','catalog','board'].forEach(k=>{if(d[k]!=null)d[k]=fbArr(d[k]);});return d;}
 async function serverRestore(id){
-  let d;try{d=await bkReq('/data/'+id);}catch(e){toast('백업을 불러오지 못했어요');return;}
+  let d;try{d=fbBackup(await bkReq('/data/'+id));}catch(e){toast('백업을 불러오지 못했어요');return;}
   if(!d||!Array.isArray(d.items)){toast('백업 내용이 비어 있어요');return;}
   await serverBackup('pre','되돌리기 직전 자동 저장');
   restoreBackup({items:d.items,room:d.room});
   if(Array.isArray(d.catalog)){const keep=new Set(d.catalog.map(c=>c.id));state.catalog.slice().forEach(c=>{if(!keep.has(c.id))writeCat(c,true);});state.catalog=d.catalog.slice();state.catalog.forEach(c=>writeCat(c));renderTiles();}
   if(d.game){state.game=normGame(d.game);writeGame();renderGame();}
+  if(Array.isArray(d.board))d.board.forEach(m=>{const x=normMsg(m.id,m);if(x&&!state.board.some(y=>y.id===x.id)){state.board.push(x);boardWrite(x);}});
   toast('🗂️ '+new Date(d.at).toLocaleString('ko-KR')+' 백업으로 되돌렸어요');
+}
+// compare one backup with now and bring back only what was lost (missing items, wiped memos, missing team memos)
+async function pickRestore(id){
+  let d;try{d=fbBackup(await bkReq('/data/'+id));}catch(e){toast('백업을 불러오지 못했어요');return;}
+  if(!d||!Array.isArray(d.items)){toast('백업 내용이 비어 있어요');return;}
+  const now=new Map(state.items.map(i=>[i.id,i]));const rows=[];
+  d.items.map(i=>normalize(i.id,i)).filter(Boolean).forEach(b=>{const c=now.get(b.id);
+    if(!c){if(b.cat!=='fixture'||1)rows.push({k:'item',id:b.id,label:'지금 없는 항목: '+b.name,sub:(b.byName?b.byName+' · ':'')+(b.memo||b.text||'').slice(0,60),b});return;}
+    ['memo','text','answer','prep'].forEach(f=>{const bv=String(b[f]||''),cv=String(c[f]||'');if(bv&&bv!==cv&&!cv.includes(bv))rows.push({k:'field',id:b.id,f,label:'“'+c.name+'”의 '+({memo:'설명',text:'글',answer:'정답',prep:'준비물'})[f]+' (지금: '+(cv?cv.slice(0,24)+'…':'비어 있음')+')',sub:bv.slice(0,90),b});});});
+  (d.board||[]).map(m=>normMsg(m.id,m)).filter(Boolean).forEach(m=>{const c=state.board.find(x=>x.id===m.id);if(!c)rows.push({k:'msg',id:m.id,label:'지금 없는 팀 메모 · '+(m.name||'익명'),sub:m.text.slice(0,90),m});else if(c.gone&&!m.gone)rows.push({k:'msgun',id:m.id,label:'휴지통에 있는 팀 메모 · '+(m.name||'익명'),sub:m.text.slice(0,90)});});
+  if(d.game&&state.game)['ideas','ghost','score'].forEach(f=>{const bv=String(d.game[f]||''),cv=String(state.game[f]||'');if(bv&&bv!==cv&&!cv.includes(bv))rows.push({k:'game',f,label:'현황 탭 '+({ideas:'회의록 아이디어',ghost:'귀신 규칙',score:'점수 규칙'})[f],sub:bv.slice(0,90),v:bv});});
+  const when=new Date(d.at).toLocaleString('ko-KR');
+  if(!rows.length){modal('🔍 골라서 되살리기','<p class="askmsg">'+when+' 백업과 비교했는데 사라지거나 지워진 내용이 없어요. 지금이 더 최신이에요.</p>');return;}
+  modal('🔍 골라서 되살리기','<p class="note" style="margin-top:0">'+when+' 백업에는 있는데 지금은 없거나 바뀐 것들이에요. 체크한 것만 되살리고, 지금 있는 건 아무것도 지우지 않아요.</p><div class="picklist">'+
+    rows.map((r,i)=>'<label class="tg"><span>'+esc(r.label)+'<small>'+esc(r.sub||'')+'</small></span><input type="checkbox" data-pk="'+i+'"'+(r.k==='msg'||r.k==='msgun'||r.k==='field'?' checked':'')+'></label>').join('')+
+    '</div><div class="row"><button class="btn primary" id="pkGo">체크한 것 되살리기</button></div>',b=>{b.querySelector('#pkGo').onclick=async()=>{
+      if(readOnly){toast('보기 전용이라 되살릴 수 없어요');return;}
+      const pick=[...b.querySelectorAll('[data-pk]:checked')].map(x=>rows[+x.dataset.pk]);if(!pick.length){toast('고른 게 없어요');return;}
+      await serverBackup('pre','골라서 되살리기 직전');let n=0;
+      pick.forEach(r=>{
+        if(r.k==='item'){if(!getItem(r.id)){state.items.push(r.b);addObj(r.b);persist(r.id,true);n++;}}
+        else if(r.k==='field'){const c=getItem(r.id);if(c){c[r.f]=r.b[r.f];refreshItem(c.id);persist(c.id,true);n++;}}
+        else if(r.k==='msg'){if(!state.board.some(x=>x.id===r.id)){const m=Object.assign({},r.m,{gone:0,goneBy:''});state.board.push(m);boardWrite(m);n++;}}
+        else if(r.k==='msgun'){boardUndelete(r.id);n++;}
+        else if(r.k==='game'){state.game[r.f]=r.v;n++;writeGame();}});
+      closeModal();uiChanged();renderTeam();renderGame();toast(n+'개를 되살렸어요');};});
 }
 function downloadJSON(obj,name){try{const url=URL.createObjectURL(new Blob([JSON.stringify(obj,null,1)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},500);}catch(e){toast('다운로드를 할 수 없는 환경이에요');}}
 const BK_KIND={auto:'자동',manual:'수동',pre:'직전 자동 저장'};
@@ -2094,7 +2125,7 @@ function backupPanelHTML(){
     '<div class="row"><button class="btn primary" id="bkNow">지금 백업</button><button class="btn" id="bkRefresh">목록 새로고침</button></div><div id="bkList">'+(bkIndex?bkListHTML():'<p class="note">불러오는 중…</p>')+'</div></details>';
 }
 let bkOpen=false;
-function bkListHTML(){if(!bkIndex.length)return '<p class="empty">아직 서버 백업이 없어요. “지금 백업”을 눌러 첫 백업을 만드세요.</p>';return bkIndex.map(x=>'<div class="bkrow2'+(x.pin?' pin':'')+'"><div><b>'+new Date(x.at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+(x.daily?' <span class="rolepill">날짜별 보관</span>':'')+'</b><small>'+(BK_KIND[x.kind]||x.kind)+' · '+esc(x.by||'')+' · 항목 '+(x.n||0)+'개'+(x.label?' · '+esc(x.label):'')+'</small></div><button class="pm" data-bkpin="'+x.id+'" aria-label="고정">'+(x.pin?'📌':'📍')+'</button><button class="pm" data-bkdl="'+x.id+'" aria-label="내려받기">⬇</button><button class="btn" data-bkres="'+x.id+'">되돌리기</button></div>').join('');}
+function bkListHTML(){if(!bkIndex.length)return '<p class="empty">아직 서버 백업이 없어요. “지금 백업”을 눌러 첫 백업을 만드세요.</p>';return bkIndex.map(x=>'<div class="bkrow2'+(x.pin?' pin':'')+'"><div><b>'+new Date(x.at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+(x.daily?' <span class="rolepill">날짜별 보관</span>':'')+'</b><small>'+(BK_KIND[x.kind]||x.kind)+' · '+esc(x.by||'')+' · 항목 '+(x.n||0)+'개'+(x.label?' · '+esc(x.label):'')+'</small></div><button class="pm" data-bkpin="'+x.id+'" aria-label="고정">'+(x.pin?'📌':'📍')+'</button><button class="pm" data-bkdl="'+x.id+'" aria-label="내려받기">⬇</button><button class="btn" data-bkpick="'+x.id+'">골라서</button><button class="btn" data-bkres="'+x.id+'">되돌리기</button></div>').join('');}
 async function fillBackupList(el,noFetch){
   const box=el.querySelector('#bkList');if(!box)return;
   if(!noFetch)try{await bkLoadIndex();}catch(e){box.innerHTML='<p class="note warn">'+(bkRulesOk===false?'규칙 업데이트가 필요해요 (위 안내 참고)':'목록을 불러오지 못했어요')+'</p>';return;}
@@ -2102,6 +2133,7 @@ async function fillBackupList(el,noFetch){
   void bkIndex.map(x=>'<div class="bkrow2'+(x.pin?' pin':'')+'"><div><b>'+new Date(x.at).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</b><small>'+(BK_KIND[x.kind]||x.kind)+' · '+esc(x.by||'')+' · 항목 '+(x.n||0)+'개'+(x.label?' · '+esc(x.label):'')+'</small></div><button class="pm" data-bkpin="'+x.id+'" aria-label="고정">'+(x.pin?'📌':'📍')+'</button><button class="pm" data-bkdl="'+x.id+'" aria-label="내려받기">⬇</button><button class="btn" data-bkres="'+x.id+'">되돌리기</button></div>').join('');
   const sec=el.querySelector('#bkSec summary em');if(sec)sec.textContent=bkIndex.length+'개 · 최근 '+ago(bkIndex[0].at);
   box.querySelectorAll('[data-bkres]').forEach(b=>b.onclick=()=>{const x=bkIndex.find(y=>y.id===b.dataset.bkres);askConfirm(new Date(x.at).toLocaleString('ko-KR')+' 백업으로 되돌릴까요? 모두의 화면에 반영돼요. 되돌리기 직전 상태도 자동으로 백업해 둬요.','되돌리기',true).then(ok=>{if(ok)serverRestore(x.id).then(()=>fillBackupList(el));});});
+  box.querySelectorAll('[data-bkpick]').forEach(b=>b.onclick=()=>pickRestore(b.dataset.bkpick));
   box.querySelectorAll('[data-bkpin]').forEach(b=>b.onclick=async()=>{const x=bkIndex.find(y=>y.id===b.dataset.bkpin);x.pin=!x.pin;const c=Object.assign({},x);delete c.id;try{await bkReq('/index/'+x.id,'PUT',c);}catch(e){}fillBackupList(el);});
   box.querySelectorAll('[data-bkdl]').forEach(b=>b.onclick=async()=>{try{const d=await bkReq('/data/'+b.dataset.bkdl);downloadJSON(d,'귀신의집-백업-'+new Date(d.at).toISOString().slice(0,16).replace(/[:T]/g,'-')+'.json');}catch(e){toast('내려받지 못했어요');}});
 }
@@ -2702,6 +2734,7 @@ function sendGame(){
 }
 /* ----- update log (shown in 설정 and after an update) ----- */
 const CHANGELOG=[
+  ['2026.10.13-22','10/13',['팀 메모판: 오래된 메모가 화면에서 사라지던 문제 (최근 60개만 보이던 것) — “이전 메모 더 보기”','메모를 지우면 휴지통으로 가고 관리자가 되살릴 수 있어요','팀 메모판도 서버 백업·내보내기에 포함','백업 “골라서”: 백업과 지금을 비교해 사라진 항목·지워진 설명·팀 메모만 골라 되살리기 (지금 것은 안 지움)','데이터 가져오기 직전에도 서버 자동 백업']],
   ['2026.10.13-21','10/13',['휴대폰 이동 패드를 작게 (화면 가림 절반 이하), 설정 → 휴대폰 이동 패드에서 크게·왼쪽·끄기 선택']],
   ['2026.10.13-20','10/13',['조명이 너무 밝던 문제: 빛이 실제 LED처럼 1~2m 안에서만 퍼지게, 🌙 불 끄기 화면 왼쪽 위에 “모든 조명” 밝기 조절 (내 화면만)','조명마다 밝기·깜빡임·빛 색을 편집 탭에서 조절','🕵️ 숨은 방: 구역을 숨은 방으로 지정하면 손님이 들어올 틈·넘겨볼 수 있는 낮은 벽·새는 조명을 현황 탭에서 검사','비밀 커튼(직원·귀신만): 손님 동선 검사에선 벽으로 계산','설치 도면 새로 만듦: 종류별 색과 기호표, 이름 표시, 같은 물건은 번호 하나로 묶기, 입구·출구·방향·축척, 천장·조명 도면 따로, 목록을 종류별로','도면에서 돌려 놓은 물건 각도가 틀리게 그려지던 문제 수정']],
   ['2026.10.12-19','10/12',['동선 검사 다시 계산: 얇은 비닐 벽도 벽으로 인식 (초록 선이 벽을 뚫던 문제 해결), 폭은 벽·물건까지 실제 거리로 5cm 단위 측정','초록 선이 벽에 붙지 않고 통로 가운데로 그려짐']],
@@ -3924,17 +3957,17 @@ function boardEdit(id,text){
   if(mode==='local')saveLocal();else if(backend&&!readOnly){const b=clone(m);delete b.id;backend.setDoc('board',m.id,b).catch(e=>onWriteError(e));}
   renderTeam();
 }
-function boardDelete(id){
-  state.board=state.board.filter(m=>m.id!==id);
-  if(mode==='local')saveLocal();else if(backend&&!readOnly)backend.delDoc('board',id).catch(e=>onWriteError(e));
-  renderTeam();
-}
-function normMsg(id,d){if(!d||typeof d!=='object')return null;return {id:String(id),edited:+d.edited||0,name:String(d.name||'').slice(0,20),by:d.by||null,text:String(d.text||'').slice(0,300),at:+d.at||0,item:d.item?String(d.item):null,itemName:String(d.itemName||'').slice(0,60)};}
+// memos are never really deleted: they go to the bin (관리자가 되살리기 가능)
+function boardWrite(m){if(mode==='local')saveLocal();else if(backend&&!readOnly){const b=clone(m);delete b.id;backend.setDoc('board',m.id,b).catch(e=>onWriteError(e));}}
+function boardDelete(id){const m=state.board.find(x=>x.id===id);if(!m)return;m.gone=Date.now();m.goneBy=(myName()||'익명').slice(0,20);boardWrite(m);renderTeam();toast('메모를 휴지통으로 옮겼어요 (관리자가 되살릴 수 있어요)');}
+function boardUndelete(id){const m=state.board.find(x=>x.id===id);if(!m)return;m.gone=0;m.goneBy='';boardWrite(m);renderTeam();toast('메모를 되살렸어요');}
+let boardAll=false;
+function normMsg(id,d){if(!d||typeof d!=='object')return null;return {id:String(id),edited:+d.edited||0,name:String(d.name||'').slice(0,20),by:d.by||null,text:String(d.text||'').slice(0,300),at:+d.at||0,item:d.item?String(d.item):null,itemName:String(d.itemName||'').slice(0,60),gone:+d.gone||0,goneBy:String(d.goneBy||'').slice(0,20)};}
 function ago(t){const s=(Date.now()-t)/1000;if(s<60)return '방금';if(s<3600)return Math.floor(s/60)+'분 전';if(s<86400)return Math.floor(s/3600)+'시간 전';return Math.floor(s/86400)+'일 전';}
 function whoName(by,byName){if(!by&&!byName)return '';if(backend&&backend.kind==='claude'){const p=profileCache[by];return p&&p.isMe?'나':(p&&p.name)||'누군가';}return by===myCid?'나':(byName||'익명');}
 let teamTimer=null;
 function scheduleTeam(){clearTimeout(teamTimer);teamTimer=setTimeout(()=>{if(curTab==='team')renderTeam();else updateTeamBadge();},200);}
-function updateTeamBadge(){const n=state.board.filter(m=>m.at>boardSeen&&m.by!==(backend&&backend.kind==='claude'?myId:myCid)).length;$('#teamN').textContent=n?String(n):'';}
+function updateTeamBadge(){const n=state.board.filter(m=>!m.gone&&m.at>boardSeen&&m.by!==(backend&&backend.kind==='claude'?myId:myCid)).length;$('#teamN').textContent=n?String(n):'';}
 async function renderTeam(){
   const el=$('#pane-team');if(!el)return;
   if(backend&&backend.kind==='claude'){const ids=[...new Set(state.items.map(i=>i.by).concat(state.board.map(m=>m.by)).filter(Boolean))];await resolveProfiles(ids);}
@@ -3958,11 +3991,14 @@ async function renderTeam(){
   h+=mine.map(it=>'<div class="trow"><button class="tname" data-goto="'+esc(it.id)+'">'+esc(it.name)+'</button>'+STATUS.map(([v,l])=>'<button class="chip mini'+((it.status||'plan')===v?' on st-'+v:'')+'" data-st="'+v+'" data-sid="'+esc(it.id)+'">'+l+'</button>').join('')+'</div>').join('');
   // board
   h+='<h3>팀 메모판<em>공지·질문·아이디어</em></h3><div class="board" id="board">';
-  const msgs=state.board.slice().sort((a,b)=>a.at-b.at).slice(-60);
+  const live=state.board.filter(m=>!m.gone).sort((a,b)=>a.at-b.at);const older=boardAll?0:Math.max(0,live.length-60);const msgs=live.slice(older);
+  if(older)h+='<button class="btn mini" id="bOlder" style="width:100%">↑ 이전 메모 '+older+'개 더 보기</button>';
   if(!msgs.length)h+='<p class="empty">첫 메모를 남겨 보세요. 예: “관은 수요일까지 골판지로 만들기”</p>';
   const meKey=(backend&&backend.kind==='claude')?myId:myCid;
   h+=msgs.map(m=>'<div class="msg'+(m.by&&m.by===meKey?' mine':'')+'"><div class="mh"><b data-mn="'+esc(m.id)+'"></b><small>'+ago(m.at)+(m.edited?' · 고침':'')+'</small>'+((typeof isHost!=='undefined'&&isHost&&!(m.by&&m.by===meKey))?'<button class="mdel" data-mdel="'+esc(m.id)+'" aria-label="관리자 삭제">✕</button>':'')+(m.by&&m.by===meKey?'<button class="mdel" data-medit="'+esc(m.id)+'" aria-label="메모 고치기">✎</button><button class="mdel" data-mdel="'+esc(m.id)+'" aria-label="메모 지우기">✕</button>':'')+'</div><p></p>'+(m.item?'<button class="chip mini" data-goto="'+esc(m.item)+'">📍 '+esc(m.itemName||'항목')+'</button>':'')+'</div>').join('');
-  h+='</div><div class="bsend"><textarea id="bText" rows="2" placeholder="메모 쓰기 (최대 300자)"'+(readOnly?' disabled':'')+'></textarea><div class="row"><label class="tg" style="border:0;padding:0;flex:1"><span><small>선택한 항목에 대한 메모로 남기기</small></span><input type="checkbox" id="bLink"'+(selId?' checked':'')+(selId?'':' disabled')+'></label><button class="btn primary" id="bSend"'+(readOnly?' disabled':'')+'>보내기</button></div></div>';
+  h+='</div>';
+  {const bin=state.board.filter(m=>m.gone).sort((a,b)=>b.gone-a.gone);if(bin.length&&typeof isHost!=='undefined'&&isHost)h+='<details class="sec"><summary>🗑️ 지운 메모 <em>'+bin.length+'개 · 관리자만 보여요</em></summary>'+bin.map(m=>'<div class="msg"><div class="mh"><b>'+esc(whoName(m.by,m.name)||'익명')+'</b><small>'+ago(m.at)+' · '+esc(m.goneBy||'')+' 삭제 '+ago(m.gone)+'</small><button class="btn mini" data-mund="'+esc(m.id)+'">되살리기</button></div><div>'+esc(m.text)+'</div></div>').join('')+'</details>';}
+  h+='<div class="bsend"><textarea id="bText" rows="2" placeholder="메모 쓰기 (최대 300자)"'+(readOnly?' disabled':'')+'></textarea><div class="row"><label class="tg" style="border:0;padding:0;flex:1"><span><small>선택한 항목에 대한 메모로 남기기</small></span><input type="checkbox" id="bLink"'+(selId?' checked':'')+(selId?'':' disabled')+'></label><button class="btn primary" id="bSend"'+(readOnly?' disabled':'')+'>보내기</button></div></div>';
   // recent changes
   const recent=state.items.filter(i=>i.at&&i.cat!=='fixture').sort((a,b)=>b.at-a.at).slice(0,12);
   h+='<h3>최근 바뀐 것</h3>'+(recent.length?recent.map(it=>'<div class="rrow"><button class="tname" data-goto="'+esc(it.id)+'">'+esc(it.name)+'</button><small>'+esc(whoName(it.by,it.byName)||'')+' · '+ago(it.at)+'</small></div>').join(''):'<p class="empty">함께 편집하면 누가 무엇을 바꿨는지 여기 쌓여요.</p>');
@@ -3975,11 +4011,13 @@ async function renderTeam(){
   el.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>{const it=getItem(b.dataset.goto);if(!it){toast('지워진 항목이에요');return;}select(it.id,false);focusItem(it);if(window.innerWidth<900)foldSheet(true);}));
   el.querySelectorAll('[data-follow]').forEach(b=>b.addEventListener('click',()=>{setFollow(followKey===b.dataset.follow?null:b.dataset.follow);renderTeam();}));
   el.querySelectorAll('[data-st]').forEach(b=>b.addEventListener('click',()=>{const it=getItem(b.dataset.sid);if(it&&!it.locked)setStatus(it,b.dataset.st);renderTeam();}));
-  el.querySelectorAll('[data-mdel]').forEach(b=>b.addEventListener('click',()=>{askConfirm('이 메모를 지울까요?','지우기',true).then(ok=>{if(ok)boardDelete(b.dataset.mdel);});}));
+  {const ob=el.querySelector('#bOlder');if(ob)ob.onclick=()=>{boardAll=true;renderTeam();};}
+  el.querySelectorAll('[data-mund]').forEach(b=>b.onclick=()=>boardUndelete(b.dataset.mund));
+  el.querySelectorAll('[data-mdel]').forEach(b=>b.addEventListener('click',()=>{askConfirm('이 메모를 지울까요? (휴지통으로 가요)','지우기',true).then(ok=>{if(ok)boardDelete(b.dataset.mdel);});}));
   el.querySelectorAll('[data-medit]').forEach(b=>b.addEventListener('click',()=>{const m=state.board.find(x=>x.id===b.dataset.medit);if(!m)return;askText('메모 고치기','내용 (최대 300자)',m.text,{multi:true,max:300}).then(v=>{if(v==null)return;boardEdit(m.id,v);});}));
   const send=el.querySelector('#bSend');if(send)send.addEventListener('click',()=>{const t=el.querySelector('#bText');boardSend(t.value,el.querySelector('#bLink').checked?selId:null);});
   const bt=el.querySelector('#bText');if(bt)bt.addEventListener('keydown',e=>{if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();el.querySelector('#bSend').click();}});
-  const bd=el.querySelector('#board');if(bd)bd.scrollTop=bd.scrollHeight;
+  const bd=el.querySelector('#board');if(bd&&!boardAll)bd.scrollTop=bd.scrollHeight;
 }
 
 /* =========================================================
@@ -4623,14 +4661,16 @@ function renderSettings(){
   $('#shotBtn').addEventListener('click',screenshot);
   $('#saveInfoBtn').addEventListener('click',showSaveInfo);
   $('#sumBtn').addEventListener('click',()=>{const t=summary();modal('설계 요약','<textarea readonly>'+esc(t)+'</textarea><div class="row"><button class="btn primary" id="cp">복사</button></div>',b=>{b.querySelector('#cp').addEventListener('click',()=>copyText(t,b.querySelector('textarea')));});});
-  $('#expBtn').addEventListener('click',()=>{const t=JSON.stringify({app:'booth-frame-1-8',version:2,room:state.room,items:state.items,catalog:state.catalog});modal('데이터 내보내기','<textarea readonly>'+esc(t)+'</textarea><div class="row"><button class="btn primary" id="cp">복사</button></div>',b=>{b.querySelector('#cp').addEventListener('click',()=>copyText(t,b.querySelector('textarea')));});});
-  $('#impBtn').addEventListener('click',()=>{if(readOnly)return;modal('데이터 가져오기','<textarea placeholder="내보낸 글자를 여기에 붙여 넣으세요"></textarea><label class="tg"><span>지금 설계에 합치기<small>끄면 지금 설계를 지우고 바꿔요</small></span><input type="checkbox" id="mergeCk" checked></label><div class="row"><button class="btn primary" id="imp">가져오기</button></div>',b=>{b.querySelector('#imp').addEventListener('click',()=>{
+  $('#expBtn').addEventListener('click',()=>{const t=JSON.stringify({app:'booth-frame-1-8',version:2,room:state.room,items:state.items,catalog:state.catalog,game:state.game,board:state.board});modal('데이터 내보내기','<textarea readonly>'+esc(t)+'</textarea><div class="row"><button class="btn primary" id="cp">복사</button></div>',b=>{b.querySelector('#cp').addEventListener('click',()=>copyText(t,b.querySelector('textarea')));});});
+  $('#impBtn').addEventListener('click',()=>{if(readOnly)return;modal('데이터 가져오기','<textarea placeholder="내보낸 글자를 여기에 붙여 넣으세요"></textarea><label class="tg"><span>지금 설계에 합치기<small>끄면 지금 설계를 지우고 바꿔요</small></span><input type="checkbox" id="mergeCk" checked></label><div class="row"><button class="btn primary" id="imp">가져오기</button></div>',b=>{b.querySelector('#imp').addEventListener('click',async()=>{
+    const btn=b.querySelector('#imp');btn.disabled=true;await safeBackup('pre','데이터 가져오기 직전');btn.disabled=false;
     try{
-      const d=JSON.parse(b.querySelector('textarea').value);if(!d||!Array.isArray(d.items))throw new Error('items 목록이 없어요');
+      const d=fbBackup(JSON.parse(b.querySelector('textarea').value));if(!d||!Array.isArray(d.items))throw new Error('items 목록이 없어요');
       const incoming=d.items.map(i=>normalize(i&&i.id,i)).filter(Boolean);const merge=b.querySelector('#mergeCk').checked;
       if(!merge){state.items.slice().forEach(it=>{if(!incoming.find(x=>x.id===it.id)){state.items=state.items.filter(x=>x.id!==it.id);removeObj(it.id);persist(it.id,true);}});}
       incoming.forEach(it=>{const i=state.items.findIndex(x=>x.id===it.id);if(i>=0)state.items[i]=it;else state.items.push(it);refreshItem(it.id);persist(it.id,true);});
       if(d.room){Object.keys(DEFAULT_ROOM).forEach(k=>{if(isFinite(+d.room[k]))state.room[k]=+d.room[k];});recompute();buildRoom();rebuildItems();writeRoomMeta();}
+      (d.board||[]).map(m=>normMsg(m.id,m)).filter(Boolean).forEach(m=>{if(!state.board.some(x=>x.id===m.id)){state.board.push(m);boardWrite(m);}});
       (d.catalog||[]).map(c=>normCat(c.id,c)).filter(Boolean).forEach(c=>{if(!state.catalog.find(x=>x.id===c.id)){state.catalog.push(c);writeCat(c);}});
       hist=[];redoSt=[];updUndo();renderTiles();renderSettings();uiChanged();closeModal();toast(incoming.length+'개를 가져왔어요');
     }catch(err){toast('가져오지 못했어요: '+(err.message||'형식 오류'));}
