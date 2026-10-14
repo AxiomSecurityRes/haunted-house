@@ -2038,7 +2038,7 @@ function bindHost(el){
 /* =========================================================
    app version check + server-side automatic backups (Firebase)
    ========================================================= */
-const APP_VERSION='2026.10.13-23';
+const APP_VERSION='2026.10.14-24';
 let updShown=false;
 async function checkUpdate(){
   if(inClaude||updShown||!/^https?:$/.test(location.protocol))return;
@@ -2213,7 +2213,7 @@ function clearanceAt(x,z,ob){
 }
 function centeredPath(N,nx,nz,sa,sb,clr,blk,near,thr,nb){
   // Dijkstra: step cost grows near walls, so the line follows the middle of each lane instead of hugging a wall
-  const dist=new Float32Array(N).fill(Infinity),prev=new Int32Array(N).fill(-2),hp=[];
+  const dist=new Float64Array(N).fill(Infinity),prev=new Int32Array(N).fill(-2),hp=[];
   const push=(d,k)=>{hp.push([d,k]);let i=hp.length-1;while(i>0){const p=(i-1)>>1;if(hp[p][0]<=hp[i][0])break;[hp[p],hp[i]]=[hp[i],hp[p]];i=p;}};
   const pop=()=>{const t=hp[0],l=hp.pop();if(hp.length){hp[0]=l;let i=0;for(;;){const a=2*i+1,b=a+1;let m=i;if(a<hp.length&&hp[a][0]<hp[m][0])m=a;if(b<hp.length&&hp[b][0]<hp[m][0])m=b;if(m===i)break;[hp[m],hp[i]]=[hp[i],hp[m]];i=m;}}return t;};
   dist[sa]=0;prev[sa]=-1;push(0,sa);
@@ -2244,7 +2244,7 @@ function computeRoute(){
   if(!bestPrev)return {width:0,reach:false,path:[],src:E.src,ends:E};
   // the line people walk: stay inside the widest corridor (>= bottleneck) and keep to the middle of it
   const thr=uv[Math.max(0,lo-1)],prev=centeredPath(N,nx,nz,sa,sb,clr,blk,near,thr,nb)||bestPrev;
-  const path=[];let k=sb,neck=sb,nd=1e9;while(k>=0){path.push({x:x0+(k%nx+.5)*C,z:z0+(Math.floor(k/nx)+.5)*C});if(clr[k]<nd&&!near[k]){nd=clr[k];neck=k;}k=prev[k];}
+  const path=[];let k=sb,neck=sb,nd=1e9,guard=0;while(k>=0&&guard++<N){path.push({x:x0+(k%nx+.5)*C,z:z0+(Math.floor(k/nx)+.5)*C});if(clr[k]<nd&&!near[k]){nd=clr[k];neck=k;}k=prev[k];}
   path.reverse();if(nd===1e9)nd=150;
   const width=Math.max(0,Math.round(2*nd/5)*5);
   const sm=path.map((p,i)=>{let sx=0,sz=0,n=0;for(let j=Math.max(0,i-3);j<=Math.min(path.length-1,i+3);j++){sx+=path[j].x;sz+=path[j].z;n++;}return {x:sx/n,z:sz/n};});
@@ -2737,6 +2737,7 @@ function sendGame(){
 }
 /* ----- update log (shown in 설정 and after an update) ----- */
 const CHANGELOG=[
+  ['2026.10.14-24','10/14',['동선 검사가 특정 배치에서 멈추던 문제 수정 (거리 계산 정밀도)']],
   ['2026.10.13-23','10/13',['3D 화면 정리: 관람 동선을 가늘고 반투명하게, 화살표는 1.5m마다 작게','문제→힌트 순서 화살표는 카드를 골랐을 때 그 카드 것만 (현황 탭에서 “모두 보기” 가능)','불 끈 화면에서는 기존 요소 이름·벽 길이 표시를 숨김','라벨이 겹치면 덜 중요한 것부터 숨김 (여유 간격 넓힘)']],
   ['2026.10.13-22','10/13',['팀 메모판: 오래된 메모가 화면에서 사라지던 문제 (최근 60개만 보이던 것) — “이전 메모 더 보기”','메모를 지우면 휴지통으로 가고 관리자가 되살릴 수 있어요','팀 메모판도 서버 백업·내보내기에 포함','백업 “골라서”: 백업과 지금을 비교해 사라진 항목·지워진 설명·팀 메모만 골라 되살리기 (지금 것은 안 지움)','데이터 가져오기 직전에도 서버 자동 백업']],
   ['2026.10.13-21','10/13',['휴대폰 이동 패드를 작게 (화면 가림 절반 이하), 설정 → 휴대폰 이동 패드에서 크게·왼쪽·끄기 선택']],
