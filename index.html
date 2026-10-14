@@ -164,6 +164,7 @@ input.bad{border-color:var(--danger)!important;background:rgba(192,57,43,.08)!im
 .bnhd{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}.bstepn{font-weight:700;color:#e8590c}.btitle{display:block;font-size:21px;margin:4px 0 2px;line-height:1.25}.bwhy{font-size:13px;color:var(--muted);margin:2px 0 6px}
 .bmini{width:100%;height:auto;display:block;border-radius:10px;background:var(--bg,transparent);margin:6px 0}.mchips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.mchip{display:flex;align-items:baseline;gap:4px;background:#fff1e6;border:1px solid #ffc9a3;color:#5c2a00;border-radius:9px;padding:6px 9px}
 .mchip i{font-style:normal;font-weight:800;color:#e8590c}.mchip small{font-size:11px}.mchip b{font-size:16px}.bhow{margin:6px 0;padding-left:20px;font-size:13.5px;line-height:1.55}.bnote{font-size:12.5px;color:var(--muted);margin:3px 0}
+.tteams{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:6px 0}.tcard{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:4px;border:2px solid var(--line);border-left:6px solid var(--tc);border-radius:12px;padding:8px 10px;background:var(--panel);color:var(--ink)}.tcard.me{border-color:var(--tc);box-shadow:0 0 0 3px color-mix(in srgb,var(--tc) 25%,transparent)}.tch{display:flex;justify-content:space-between;align-items:baseline}.tch b{font-size:18px;color:var(--tc)}.tch span{font-size:12px;color:var(--muted)}.tbar{height:6px;border-radius:9px;background:var(--line);overflow:hidden}.tbar i{display:block;height:100%;background:var(--tc)}.tjob{margin:0;font-size:12.5px;line-height:1.35}.tmem{display:flex;flex-wrap:wrap;gap:3px}.tmem i{font-style:normal;font-size:12px;border:1px solid var(--line);border-radius:99px;padding:1px 7px}.tmem i.lead{background:var(--tc);border-color:var(--tc);color:#fff;font-weight:700}.tmem i.pr{border-style:dashed;opacity:.75}.tfoot{font-size:11.5px;color:var(--muted)}.tpr{font-size:13px;margin:2px 0 6px}.tfs{border:2px solid var(--tc);border-radius:10px;margin:0 0 8px;padding:4px 10px 8px}.tfs legend{color:var(--tc);font-weight:800;padding:0 4px}
 .bacts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.bacts .big{flex:1 1 100%;font-size:17px;padding:13px}.bteam{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 8px}.tchip{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:4px 10px}.tchip.me{border-color:#3b82f6;background:rgba(59,130,246,.1)}
 .bph summary{display:flex;align-items:center;gap:6px}.bph .phi{font-size:16px}.bph .phbar{flex:1;height:6px;border-radius:99px;background:var(--line);overflow:hidden;max-width:120px;margin-left:auto}.bph .phbar i{display:block;height:100%;background:#2fb344}
 .bhead{display:flex;align-items:center;gap:8px;margin:2px 0 10px}.bhead .bbar{flex:1;height:12px;border-radius:99px;background:var(--line);overflow:hidden}.bhead .bbar i{display:block;height:100%;background:#2fb344}.bhead b{font-size:16px}.bhead span{font-size:12px;color:var(--muted)}
@@ -2059,7 +2060,7 @@ function bindHost(el){
 /* =========================================================
    app version check + server-side automatic backups (Firebase)
    ========================================================= */
-const APP_VERSION='2026.10.15-27';
+const APP_VERSION='2026.10.15-28';
 let updShown=false;
 async function checkUpdate(){
   if(inClaude||updShown||!/^https?:$/.test(location.protocol))return;
@@ -2758,6 +2759,7 @@ function sendGame(){
 }
 /* ----- update log (shown in 설정 and after an update) ----- */
 const CHANGELOG=[
+  ['2026.10.15-28','10/15',['👥 조별 역할 (제작 모드): 1~4조 카드 — 조장 ★·홍보 📣·맡은 일·진행률, 카드를 누르면 우리 조 것만 보기 (3D도)','🎯 조별 자동 배정: 가로 벽·천장 장식 1조 · 세로 벽·큰 소품 2조 · 문제·자물쇠·심판석 3조 · 벽 장식·조명·귀신 4조','🖨️ 조별 역할표 인쇄 (조마다 할 일 체크리스트 + 위치)','✏️ 편성 고치기 (번호·조장·맡은 일)','설계안 3개: 심판석을 가운데 벽 4번째 책상 자리로']],
   ['2026.10.15-27','10/14',['데이터 가져오기: “투표용 설계안 3개 불러오기” 버튼 (붙여넣기 없이 바로)','📂 파일에서 가져오기 — 휴대폰 붙여넣기가 10만 글자에서 잘리던 문제 해결','잘린 붙여넣기는 원인을 알려줌']],
   ['2026.10.15-26','10/15',['🔨 제작 모드 새 단장: 단계 표시줄(바닥 표시→책상→비닐→소품→카드→장식→조명→마무리), 지금 할 것 카드에 미니 도면과 줄자 화살표(창가벽·앞벽에서 몇 cm), 치수 칩, 단계별 방법, 나중에 하기, 제작 시간, 사람별 진행','제작 모드에서 고른 물건에 3D 치수선','설계안 묶음 가져오기: 여러 안을 한 번에 투표 목록에 넣기 (지금 설계는 안 바뀜)']],
   ['2026.10.15-25','10/15',['🔨 제작 모드 (모드 → 제작): “다음 할 것” 카드, 벽에서 몇 cm인지 실측 안내, 단계별(바닥 표시→책상→비닐→소품→카드→장식→조명) 체크, 담당 나누기, 내 것만 보기, 준비물 목록, 마무리 점검','🧩 방탈출 설정 (현황 탭): 문제·정답·함정·힌트·자물쇠 숫자를 한 화면에서, 자물쇠 번호 자동 계산·점검, 문제 카드를 칠판·뒤 게시판·태블릿함에 바로 놓기','🖨️ 문제·힌트 카드 인쇄 (자르기 쉬운 큰 글씨) · 🧾 심판용 정답표 (정답·자물쇠 번호·상품·팀 기록표)','편집 탭에 실측 안내 (제작·전문가 모드)']],
@@ -4119,7 +4121,7 @@ function normGame(d){
   g.showChain=d.showChain!==false;g.checks={};if(d.checks&&typeof d.checks==='object')FEST_MANUAL.forEach(([k])=>{g.checks[k]=!!d.checks[k];});
   const pu=arr(d.purchases);if(pu)g.purchases=pu.filter(Boolean).slice(0,40).map(x=>({key:S2(x.key,30),name:S2(x.name,80),unit:Math.max(0,+x.unit||0),qty:Math.max(0,+x.qty||0),ship:Math.max(0,+x.ship||0),measure:['count','length','area','none'].includes(x.measure)?x.measure:'none',cap:x.cap!=null&&isFinite(+x.cap)?+x.cap:null,unitLabel:S2(x.unitLabel,6),pst:['plan','ordered','arrived'].includes(x.pst)?x.pst:'plan',buyer:S2(x.buyer,30)}));
   if(d.lock&&typeof d.lock==='object')g.lock={code:S2(d.lock.code,8).replace(/[^0-9A-Za-z]/g,'')};
-  if(d.build&&typeof d.build==='object'){g.build={final:{},marks:{}};if(+d.build.start>0)g.build.start=+d.build.start;const f=d.build.final||{};Object.keys(f).slice(0,20).forEach(k=>{if(/^[a-z]{1,12}$/.test(k)&&f[k])g.build.final[k]=true;});const mk=d.build.marks||{};Object.keys(mk).slice(0,200).forEach(k=>{if(/^[A-Za-z0-9_-]{1,40}$/.test(k)&&mk[k])g.build.marks[k]=true;});}
+  if(d.build&&typeof d.build==='object'){g.build={final:{},marks:{}};if(+d.build.start>0)g.build.start=+d.build.start;const f=d.build.final||{};Object.keys(f).slice(0,20).forEach(k=>{if(/^[a-z]{1,12}$/.test(k)&&f[k])g.build.final[k]=true;});const mk=d.build.marks||{};Object.keys(mk).slice(0,200).forEach(k=>{if(/^[A-Za-z0-9_-]{1,40}$/.test(k)&&mk[k])g.build.marks[k]=true;});const tm=arr(d.build.teams);if(tm&&tm.length)g.build.teams=tm.filter(Boolean).slice(0,8).map(x=>({n:S2(x.n,10)||'조',lead:S2(x.lead,4),mem:S2(x.mem,80),job:S2(x.job,140)}));if(d.build.pr!=null)g.build.pr=S2(d.build.pr,40);}
   g.teamMin=clamp(+d.teamMin||4,0.5,30);
   g.teamSize=clamp(+d.teamSize||4,1,20);g.turnover=clamp(d.turnover!=null?+d.turnover:1,0,10);return g;
 }
@@ -4298,7 +4300,7 @@ function buildGroups(){
   Object.values(ph).forEach(a=>a.sort((x,y)=>(x.done===x.items.length)-(y.done===y.items.length)||(y.items.length-x.items.length)||x.name.localeCompare(y.name,'ko')));
   return ph;
 }
-function buildNext(ph){for(const p of BUILD_PHASES){const arr=(ph[p.k]||[]).filter(g=>g.done<g.items.length&&(!buildMineOnly||g.items.some(i=>(i.owner||'')===myName())));const gr=arr.find(g=>!g.items.every(i=>buildSkip.has(i.id)))||arr[0];if(gr)return {p,gr};}return null;}
+function buildNext(ph){for(const p of BUILD_PHASES){const arr=(ph[p.k]||[]).filter(g=>g.done<g.items.length&&(!buildMineOnly||g.items.some(isMine)));const gr=arr.find(g=>!g.items.every(i=>buildSkip.has(i.id)))||arr[0];if(gr)return {p,gr};}return null;}
 let buildMineOnly=false,buildOpen=null;
 let buildSkip=new Set(),buildTick=null;
 function buildMiniSVG(targets,doneIds){
@@ -4338,6 +4340,94 @@ const PHASE_STEPS={desk:['바닥 테이프 선에 맞춰 책상을 일렬로','�
   deco:['손님 머리에 안 닿게 (180cm 이상)','떨어지지 않게 테이프 두 번'],
   light:['건전지·스위치 확인','불 끄고 밝기 보기 (앱 🌙)']};
 function buildClock(){const st=state.game&&state.game.build&&state.game.build.start;if(!st)return '';const m=Math.floor((Date.now()-st)/60000);return Math.floor(m/60)+':'+String(m%60).padStart(2,'0');}
+/* ----- 조 편성 (build teams): who builds what ----- */
+const TEAMS_DEFAULT=[
+  {n:'1조',lead:'8',mem:'8,2,19,26,6,14,27',job:'가로 벽: 책상·비닐 (4번째 책상 자리는 심판석으로 비우기) + 천장 장식 (높은 곳 담당)'},
+  {n:'2조',lead:'16',mem:'16,10,5,18,25,20',job:'세로 벽 + 큰 소품 (관·마네킹) · B안이면 가로 벽의 복도 쪽 절반'},
+  {n:'3조',lead:'21',mem:'21,29,17,15,1,3,23',job:'방탈출: 문제지·힌트 카드, 자물쇠 상자, 찾을 물건, 심판석·간식, 정답표 인쇄'},
+  {n:'4조',lead:'22',mem:'22,9,24,28,11,12,13',job:'분위기: 벽 장식·작은 소품, 조명, 효과음, 비상구 표시, 귀신 분장'}
+];
+const TEAM_PR_DEFAULT='11,26';
+const TEAM_COLORS=['#e8590c','#1c7ed6','#2f9e44','#9c36b5','#868e96'];
+function buildTeams(){const b=(state.game&&state.game.build)||{};const t=Array.isArray(b.teams)&&b.teams.length?b.teams:TEAMS_DEFAULT;return t.map((x,i)=>Object.assign({},x,{c:TEAM_COLORS[i%TEAM_COLORS.length]}));}
+function teamPR(){const b=(state.game&&state.game.build)||{};return String(b.pr!=null?b.pr:TEAM_PR_DEFAULT);}
+const numList=s=>String(s||'').split(/[^0-9]+/).filter(Boolean);
+let myTeam=(()=>{try{return localStorage.getItem('bf-team')||'';}catch(e){return '';}})();
+function setMyTeam(t){myTeam=t||'';try{localStorage.setItem('bf-team',myTeam);}catch(e){}}
+function isMine(i){const o=(i.owner||'').trim();if(!o)return false;const me=myName();return (me&&o===me)||(myTeam&&o===myTeam);}
+/* one rule for "which team builds this" — walls split by direction, game items to 3조, small decor/lights to 4조 */
+function teamCtx(){
+  const vis=state.items.filter(i=>!i.hidden&&i.cat!=='fixture');
+  const isWallPiece=i=>(i.type==='line'&&!i.staff)||(i.type==='box'&&i.preset==='desk'&&!/간식|심판/.test(i.name||''));
+  const vert=i=>i.type==='line'?Math.abs(i.pts[1].z-i.pts[0].z)>Math.abs(i.pts[1].x-i.pts[0].x):Math.abs(((+i.rot||0)%180+180)%180-90)<1;
+  const hasVert=vis.some(i=>isWallPiece(i)&&vert(i));
+  const judge=vis.find(i=>/심판석/.test(i.name||'')&&i.type==='box');
+  return {isWallPiece,vert,hasVert,mid:judge?judge.x:Wcm/2};
+}
+function autoTeam(it,cx){
+  if(!it||it.hidden||it.cat==='fixture'||it.type==='path'||it.type==='region'||it.preset==='pin'||it.shape==='marker')return '';
+  const nm=String(it.name||'');
+  if(it.shape==='textbox'||/홍보|안내판/.test(nm))return '홍보';
+  if((it.type==='box'&&/심판|간식/.test(nm))||it.preset==='freeBox')return '3조';
+  const k=planKind(it);
+  if(k==='quiz'||k==='hint'||k==='goal')return '3조';
+  if(cx.isWallPiece(it)){
+    if(cx.vert(it))return '2조';
+    if(cx.hasVert)return '1조';
+    const x=it.type==='line'?(it.pts[0].x+it.pts[1].x)/2:it.x;return x<cx.mid?'1조':'2조';}
+  if(k==='ceil'||k==='ceilCover')return '1조';
+  if(k==='light'||k==='deco'||k==='actor')return '4조';
+  if(k==='prop'||k==='zone'){const big=Math.max(+it.w||0,+it.d||0,+it.h||0);return big<35?'4조':'2조';}
+  return '';
+}
+function applyAutoTeams(overwrite){
+  if(readOnly)return 0;const cx=teamCtx();const ch=[];
+  state.items.forEach(it=>{const t=autoTeam(it,cx);if(!t)return;if(!overwrite&&(it.owner||'').trim())return;if(it.owner===t)return;ch.push([it,t]);});
+  if(!ch.length)return 0;beginGroup(ch.map(c=>c[0].id));ch.forEach(([it,t])=>{it.owner=t;persist(it.id,true);});endGroup();
+  const g=state.game;if(g&&Array.isArray(g.roles)){const r=g.roles.find(x=>/홍보/.test(x.role));if(r&&!String(r.nums||'').trim()){r.nums=numList(teamPR()).join(', ');writeGame();}}
+  uiChanged();return ch.length;
+}
+function teamStats(){const res={};state.items.forEach(i=>{if(i.hidden||i.cat==='fixture')return;const o=(i.owner||'').trim();if(!o)return;const r=res[o]=res[o]||{n:0,d:0};r.n++;if(i.status==='done')r.d++;});return res;}
+function teamsHTML(){
+  const T=buildTeams(),pr=numList(teamPR()),st=teamStats();const ro=readOnly?' disabled':'';
+  let h='<div class="tteams">'+T.map(t=>{const s=st[t.n]||{n:0,d:0};const pct=s.n?Math.round(s.d/s.n*100):0;const mem=numList(t.mem);const work=mem.filter(m=>!pr.includes(m)).length;
+    return '<button class="tcard'+(t.n===myTeam?' me':'')+'" data-myteam="'+esc(t.n)+'" style="--tc:'+t.c+'"><div class="tch"><b>'+esc(t.n)+'</b><span>'+(s.n?s.d+'/'+s.n:'담당 없음')+'</span></div><div class="tbar"><i style="width:'+pct+'%"></i></div>'+
+      '<p class="tjob">'+esc(t.job||'')+'</p><div class="tmem">'+mem.map(m=>'<i class="'+(m===String(t.lead)?'lead':'')+(pr.includes(m)?' pr':'')+'">'+(m===String(t.lead)?'★':'')+esc(m)+(pr.includes(m)?'📣':'')+'</i>').join('')+'</div><small class="tfoot">조장 '+esc(t.lead||'-')+'번 · 제작 '+work+'명'+(t.n===myTeam?' · <b>우리 조</b>':'')+'</small></button>';}).join('')+'</div>';
+  const ps=st['홍보']||{n:0,d:0};
+  h+='<p class="tpr">📣 <b>홍보</b> '+(pr.length?pr.map(x=>x+'번').join(', '):'미정')+' — 포스터·입구 안내·대기줄'+(ps.n?' · 안내판 '+ps.d+'/'+ps.n:'')+'</p>';
+  const unassigned=state.items.filter(i=>!i.hidden&&i.cat!=='fixture'&&!(i.owner||'').trim()&&autoTeam(i,teamCtx())).length;
+  h+='<div class="row"><button class="btn'+(unassigned?' primary':'')+'" id="tAuto"'+ro+'>🎯 조별 자동 배정'+(unassigned?' ('+unassigned+'개 비어 있음)':'')+'</button><button class="btn" id="tPrint">🖨️ 조별 역할표</button><button class="btn" id="tEdit"'+ro+'>✏️ 편성 고치기</button></div>';
+  h+='<div class="row"><label class="tg" style="flex:1;border:0;padding:0"><span>우리 조 것만 보기<small>'+(myTeam?esc(myTeam)+' 카드를 다시 누르면 해제':'위에서 우리 조 카드를 누르세요')+(myName()?' · “'+esc(myName())+'” 담당도 포함':'')+'</small></span><input type="checkbox" id="bMine"'+(buildMineOnly?' checked':'')+'></label></div>';
+  return h;
+}
+function bindTeams(el){
+  el.querySelectorAll('[data-myteam]').forEach(b=>b.addEventListener('click',()=>{const t=b.dataset.myteam;if(myTeam===t){setMyTeam('');buildMineOnly=false;ownerFilter='';toast('조 선택 해제');}else{setMyTeam(t);buildMineOnly=true;ownerFilter=t;toast('👥 '+t+' — 우리 조 것만 보여요 (3D도)');}objs.forEach(o=>{o.k=-1;});renderBuild();updateCheckMarks();renderList();}));
+  const a=el.querySelector('#tAuto');if(a)a.onclick=async()=>{const has=state.items.some(i=>!i.hidden&&i.cat!=='fixture'&&(i.owner||'').trim()&&autoTeam(i,teamCtx())&&i.owner!==autoTeam(i,teamCtx()));
+    let ow=false;if(has){ow=await askTeamOverwrite('조별 자동 배정','이미 담당이 적힌 것도 규칙대로 다시 나눌까요?<br><small>취소 = 비어 있는 것만 채우기</small>','모두 다시 나누기');}
+    const n=applyAutoTeams(ow);toast(n?'🎯 '+n+'개에 조를 정했어요':'바꿀 것이 없어요');renderBuild();};
+  const p=el.querySelector('#tPrint');if(p)p.onclick=openTeamPrint;
+  const e=el.querySelector('#tEdit');if(e)e.onclick=editTeams;
+}
+function askTeamOverwrite(title,msg,okLabel){return new Promise(res=>{let done=false;modal(title,'<p class="askmsg">'+msg+'</p><div class="row"><button class="btn" id="acNo">비어 있는 것만</button><button class="btn primary" id="acYes">'+okLabel+'</button></div>',b=>{b.querySelector('#acYes').onclick=()=>{done=true;closeModal();res(true);};b.querySelector('#acNo').onclick=()=>{done=true;closeModal();res(false);};});});}
+function editTeams(){
+  if(readOnly)return;const T=buildTeams();
+  modal('✏️ 조 편성 고치기',T.map((t,i)=>'<fieldset class="tfs" style="--tc:'+t.c+'"><legend>'+esc(t.n)+'</legend><div class="g2"><label class="f"><span>조장 번호</span><input type="text" inputmode="numeric" maxlength="3" data-te="'+i+'|lead" value="'+esc(t.lead)+'"></label><label class="f"><span>번호 (쉼표로)</span><input type="text" maxlength="60" data-te="'+i+'|mem" value="'+esc(t.mem)+'"></label></div><label class="f"><span>맡은 일</span><input type="text" maxlength="120" data-te="'+i+'|job" value="'+esc(t.job)+'"></label></fieldset>').join('')+
+    '<label class="f"><span>📣 홍보 번호</span><input type="text" maxlength="40" id="tePr" value="'+esc(teamPR())+'"></label><div class="row"><button class="btn" id="teReset">사진 편성으로 되돌리기</button><button class="btn primary" id="teSave">저장</button></div>',b=>{
+    b.querySelector('#teSave').onclick=()=>{const nt=T.map(t=>({n:t.n,lead:t.lead,mem:t.mem,job:t.job}));b.querySelectorAll('[data-te]').forEach(inp=>{const [i,k]=inp.dataset.te.split('|');nt[+i][k]=inp.value.trim();});
+      const g=state.game;g.build=Object.assign({},g.build||{});g.build.teams=nt;g.build.pr=b.querySelector('#tePr').value.trim();writeGame();closeModal();renderBuild();toast('👥 편성 저장');};
+    b.querySelector('#teReset').onclick=()=>{const g=state.game;g.build=Object.assign({},g.build||{});delete g.build.teams;delete g.build.pr;writeGame();closeModal();renderBuild();toast('사진 편성으로 되돌렸어요');};});
+}
+function openTeamPrint(){
+  const e=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const T=buildTeams(),pr=numList(teamPR()),ph=buildGroups();
+  const rows=owner=>{const out=[];BUILD_PHASES.forEach(p=>(ph[p.k]||[]).forEach(gr=>{const mine=gr.items.filter(i=>(i.owner||'').trim()===owner);if(!mine.length)return;
+      out.push('<tr><td class="ck">☐</td><td>'+p.icon+' '+e(p.label)+'</td><td><b>'+e(mine.length>1?String(mine[0].name).replace(/[\s\-]*\d+$/,'').trim()+' ×'+mine.length:mine[0].name)+'</b>'+(mine[0].memo?'<br><small>'+e(mine[0].memo)+'</small>':'')+'</td><td><small>'+e(measureText(mine[0]))+(mine.length>1?' 외 '+(mine.length-1)+'곳 (도면 참고)':'')+'</small></td></tr>');}));
+    return out.length?'<table><tr><th></th><th>단계</th><th>할 것</th><th>위치 (첫 번째)</th></tr>'+out.join('')+'</table>':'<p class="em">앱에서 “🎯 조별 자동 배정”을 누르면 할 일이 채워져요.</p>';};
+  const body='<h1>1-8 귀신의 집 · 조별 제작 역할표</h1><p class="sub">'+new Date().toLocaleString('ko-KR')+' · ★ 조장 · 📣 홍보 (조 일 대신 홍보) · 조장은 끝난 것을 앱 🔨 제작 모드에서 ✅</p>'+
+    T.map(t=>{const mem=numList(t.mem);return '<section style="--tc:'+t.c+'"><h2>'+e(t.n)+' <span>조장 '+e(t.lead)+'번</span></h2><p class="mem">'+mem.map(m=>'<i class="'+(m===String(t.lead)?'lead':'')+(pr.includes(m)?' pr':'')+'">'+(m===String(t.lead)?'★':'')+e(m)+(pr.includes(m)?'📣':'')+'</i>').join('')+'</p><p class="job">맡은 일: <b>'+e(t.job)+'</b></p>'+rows(t.n)+'</section>';}).join('')+
+    '<section style="--tc:#868e96"><h2>📣 홍보 <span>'+e(pr.map(x=>x+'번').join(', '))+'</span></h2><p class="job">포스터·입구 안내·대기줄 안내</p>'+rows('홍보')+'</section>';
+  openPrintHTML('조별 역할표',body,'h1{font-size:20px;margin:4px 0}.sub{color:#555;font-size:12px;margin:0 0 8px}section{border:2px solid var(--tc);border-radius:10px;padding:8px 10px;margin:0 0 10px;break-inside:avoid}h2{margin:0 0 4px;color:var(--tc);font-size:18px}h2 span{font-size:13px;color:#333;margin-left:6px}.mem{margin:0 0 4px}.mem i{display:inline-block;font-style:normal;border:1px solid #bbb;border-radius:99px;padding:1px 8px;margin:0 3px 3px 0;font-size:13px}.mem i.lead{background:var(--tc);color:#fff;border-color:var(--tc);font-weight:700}.mem i.pr{border-style:dashed;color:#777}.job{margin:0 0 6px;font-size:13px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #ccc;padding:3px 5px;text-align:left;vertical-align:top}th{background:#f3f3f3}td.ck{width:18px;font-size:15px;text-align:center}small{color:#555}.em{color:#888;font-size:12px}');
+}
 function renderBuild(){
   const el=$('#pane-build');if(!el||curTab!=='build')return;const g=state.game||{};const ro=readOnly?' disabled':'';
   if(el.contains(document.activeElement)&&document.activeElement.tagName==='INPUT')return;
@@ -4366,17 +4456,14 @@ function renderBuild(){
         (steps2.length?'<ol class="bhow">'+steps2.map(t=>'<li>'+esc(t)+'</li>').join('')+'</ol>':'')+(it.memo?'<p class="bnote">📝 '+esc(it.memo)+'</p>':'')+(it.prep?'<p class="bnote">🧰 '+esc(it.prep)+'</p>':'')+(it.owner?'<p class="bnote">👤 담당 '+esc(it.owner)+'</p>':'')+
         '<div class="bacts"><button class="btn primary big" data-bdone="'+esc(it.id)+'"'+ro+'>✅ 다 했어요</button>'+(gr.items.length>1?'<button class="btn" data-bdoneall="'+esc(planGroupKey(it))+'"'+ro+'>✅ '+gr.items.length+'개 모두</button>':'')+'<button class="btn" data-bgo="'+esc(it.id)+'">📍 3D</button><button class="btn" data-bskip="'+esc(it.id)+'">⏭ 나중에</button></div></div>';}}
   h+=card;
-  // who is doing what
-  const owners={};state.items.forEach(i=>{if(i.hidden||i.cat==='fixture'||!i.owner)return;const o=owners[i.owner]=owners[i.owner]||{n:0,d:0};o.n++;if(i.status==='done')o.d++;});
-  const on=Object.keys(owners);
-  h+='<div class="bteam">'+(on.length?on.map(n=>'<span class="tchip'+(n===me?' me':'')+'"><b>'+esc(n)+'</b> '+owners[n].d+'/'+owners[n].n+'</span>').join(''):'<span class="note">담당을 정하면 사람별 진행이 여기 보여요 (목록의 “담당” 버튼)</span>')+'</div>';
-  h+='<div class="row"><label class="tg" style="flex:1;border:0;padding:0"><span>내가 맡은 것만 보기<small>“'+esc(me||'이름')+'” 담당</small></span><input type="checkbox" id="bMine"'+(buildMineOnly?' checked':'')+'></label></div>';
+  // who is doing what — 조 편성
+  h+='<details class="sec tsec" open><summary>👥 조별 역할 <em>'+(myTeam?esc(myTeam):'우리 조를 골라요')+'</em></summary>'+teamsHTML()+'</details>';
   h+='<div class="row"><button class="btn" id="bMat">🧰 준비물</button><button class="btn" id="bPrint">🖨️ 설치 도면</button><button class="btn" id="bPz">🧩 문제·자물쇠</button></div>';
   // floor marks
   if(walls.length){const md=walls.filter(w=>mk[w.id]).length;
     h+='<details class="sec bph'+(md===walls.length?' alldone':'')+'" data-bph="mark"'+(cur.k==='mark'||buildOpen==='mark'?' open':'')+'><summary><span class="phi">📏</span> 바닥에 벽 자리 표시 <em class="phbar"><i style="width:'+(md/walls.length*100)+'%"></i></em><em>'+md+'/'+walls.length+'</em></summary>'+
       walls.map(w=>'<div class="brow2'+(mk[w.id]?' done':'')+'"><button class="bck" data-bmark="'+esc(w.id)+'"'+ro+'>'+(mk[w.id]?'✓':'')+'</button><div class="bmain" data-bgo="'+esc(w.id)+'"><b>'+esc(w.name)+'</b><small>'+esc(measureText(w))+'</small></div></div>').join('')+'</details>';}
-  BUILD_PHASES.forEach(p=>{const arr=(ph[p.k]||[]).filter(gr=>!buildMineOnly||gr.items.some(i=>(i.owner||'')===me));if(!arr.length)return;
+  BUILD_PHASES.forEach(p=>{const arr=(ph[p.k]||[]).filter(gr=>!buildMineOnly||gr.items.some(isMine));if(!arr.length)return;
     const n=arr.reduce((s,gr)=>s+gr.items.length,0),d=arr.reduce((s,gr)=>s+gr.done,0);const open=buildOpen===p.k||(buildOpen==null&&cur.k===p.k);
     h+='<details class="sec bph'+(d===n?' alldone':'')+'" data-bph="'+p.k+'"'+(open?' open':'')+'><summary><span class="phi">'+p.icon+'</span> '+esc(p.label)+' <em class="phbar"><i style="width:'+(d/n*100)+'%"></i></em><em>'+d+'/'+n+'</em></summary><p class="note">'+esc(p.hint)+'</p>'+
       arr.map(gr=>{const all=gr.done===gr.items.length;const it=gr.items[0];const owners2=[...new Set(gr.items.map(i=>i.owner).filter(Boolean))].join(', ');
@@ -4396,7 +4483,8 @@ function renderBuild(){
   el.querySelectorAll('[data-bfin]').forEach(c=>c.addEventListener('change',()=>{if(readOnly)return;const g2=state.game;g2.build=Object.assign({},g2.build||{});g2.build.final=Object.assign({},g2.build.final||{});g2.build.final[c.dataset.bfin]=c.checked;writeGame();renderBuild();}));
   const st=el.querySelector('#bStart');if(st)st.onclick=()=>{if(readOnly)return;const g2=state.game;g2.build=Object.assign({},g2.build||{},{start:Date.now()});writeGame();renderBuild();};
   clearInterval(buildTick);if(g.build&&g.build.start)buildTick=setInterval(()=>{const c=$('#bClock');if(!c||curTab!=='build'){clearInterval(buildTick);return;}c.textContent=buildClock();},20000);
-  const mi=el.querySelector('#bMine');if(mi)mi.addEventListener('change',()=>{buildMineOnly=mi.checked;renderBuild();});
+  bindTeams(el);
+  const mi=el.querySelector('#bMine');if(mi)mi.addEventListener('change',()=>{buildMineOnly=mi.checked;ownerFilter=mi.checked&&myTeam?myTeam:'';objs.forEach(o=>{o.k=-1;});renderBuild();updateCheckMarks();});
   const pr=el.querySelector('#bPrint');if(pr)pr.onclick=openInstallPlan;
   const mt=el.querySelector('#bMat');if(mt)mt.onclick=showBuildMaterials;
   const pz=el.querySelector('#bPz');if(pz)pz.onclick=()=>{showTab('game',true);setTimeout(()=>{const s2=$('#pzSec');if(s2){s2.open=true;s2.scrollIntoView({behavior:'smooth'});}},80);};
