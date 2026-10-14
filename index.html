@@ -2059,7 +2059,7 @@ function bindHost(el){
 /* =========================================================
    app version check + server-side automatic backups (Firebase)
    ========================================================= */
-const APP_VERSION='2026.10.15-26';
+const APP_VERSION='2026.10.15-27';
 let updShown=false;
 async function checkUpdate(){
   if(inClaude||updShown||!/^https?:$/.test(location.protocol))return;
@@ -2758,6 +2758,7 @@ function sendGame(){
 }
 /* ----- update log (shown in 설정 and after an update) ----- */
 const CHANGELOG=[
+  ['2026.10.15-27','10/14',['데이터 가져오기: “투표용 설계안 3개 불러오기” 버튼 (붙여넣기 없이 바로)','📂 파일에서 가져오기 — 휴대폰 붙여넣기가 10만 글자에서 잘리던 문제 해결','잘린 붙여넣기는 원인을 알려줌']],
   ['2026.10.15-26','10/15',['🔨 제작 모드 새 단장: 단계 표시줄(바닥 표시→책상→비닐→소품→카드→장식→조명→마무리), 지금 할 것 카드에 미니 도면과 줄자 화살표(창가벽·앞벽에서 몇 cm), 치수 칩, 단계별 방법, 나중에 하기, 제작 시간, 사람별 진행','제작 모드에서 고른 물건에 3D 치수선','설계안 묶음 가져오기: 여러 안을 한 번에 투표 목록에 넣기 (지금 설계는 안 바뀜)']],
   ['2026.10.15-25','10/15',['🔨 제작 모드 (모드 → 제작): “다음 할 것” 카드, 벽에서 몇 cm인지 실측 안내, 단계별(바닥 표시→책상→비닐→소품→카드→장식→조명) 체크, 담당 나누기, 내 것만 보기, 준비물 목록, 마무리 점검','🧩 방탈출 설정 (현황 탭): 문제·정답·함정·힌트·자물쇠 숫자를 한 화면에서, 자물쇠 번호 자동 계산·점검, 문제 카드를 칠판·뒤 게시판·태블릿함에 바로 놓기','🖨️ 문제·힌트 카드 인쇄 (자르기 쉬운 큰 글씨) · 🧾 심판용 정답표 (정답·자물쇠 번호·상품·팀 기록표)','편집 탭에 실측 안내 (제작·전문가 모드)']],
   ['2026.10.14-24','10/14',['동선 검사가 특정 배치에서 멈추던 문제 수정 (거리 계산 정밀도)']],
@@ -4942,10 +4943,15 @@ function renderSettings(){
   $('#saveInfoBtn').addEventListener('click',showSaveInfo);
   $('#sumBtn').addEventListener('click',()=>{const t=summary();modal('설계 요약','<textarea readonly>'+esc(t)+'</textarea><div class="row"><button class="btn primary" id="cp">복사</button></div>',b=>{b.querySelector('#cp').addEventListener('click',()=>copyText(t,b.querySelector('textarea')));});});
   $('#expBtn').addEventListener('click',()=>{const t=JSON.stringify({app:'booth-frame-1-8',version:2,room:state.room,items:state.items,catalog:state.catalog,game:state.game,board:state.board});modal('데이터 내보내기','<textarea readonly>'+esc(t)+'</textarea><div class="row"><button class="btn primary" id="cp">복사</button></div>',b=>{b.querySelector('#cp').addEventListener('click',()=>copyText(t,b.querySelector('textarea')));});});
-  $('#impBtn').addEventListener('click',()=>{if(readOnly)return;modal('데이터 가져오기','<textarea placeholder="내보낸 글자를 여기에 붙여 넣으세요"></textarea><label class="tg"><span>지금 설계에 합치기<small>끄면 지금 설계를 지우고 바꿔요</small></span><input type="checkbox" id="mergeCk" checked></label><div class="row"><button class="btn primary" id="imp">가져오기</button></div>',b=>{b.querySelector('#imp').addEventListener('click',async()=>{
+  $('#impBtn').addEventListener('click',()=>{if(readOnly)return;modal('데이터 가져오기','<div class="row" style="margin-top:0"><button class="btn primary" id="impABC">🗳️ 투표용 설계안 3개 불러오기</button><button class="btn" id="impFile">📂 파일에서</button><input type="file" id="impFileIn" accept=".json,.txt,application/json,text/plain" hidden></div><p class="note" style="margin-top:4px">휴대폰은 붙여넣기가 10만 글자에서 잘려요. 큰 데이터는 <b>파일에서</b>로 여세요.</p><textarea placeholder="또는 내보낸 글자를 여기에 붙여 넣으세요"></textarea><label class="tg"><span>지금 설계에 합치기<small>끄면 지금 설계를 지우고 바꿔요</small></span><input type="checkbox" id="mergeCk" checked></label><div class="row"><button class="btn primary" id="imp">가져오기</button></div>',b=>{const ta=b.querySelector('textarea');
+    b.querySelector('#impFile').addEventListener('click',()=>b.querySelector('#impFileIn').click());
+    b.querySelector('#impFileIn').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{ta.value=await f.text();b.querySelector('#imp').click();}catch(err){toast('파일을 읽지 못했어요');}});
+    b.querySelector('#impABC').addEventListener('click',async e=>{e.target.disabled=true;try{const r=await fetch('plans-ABC.json?v='+APP_VERSION,{cache:'no-store'});if(!r.ok)throw 0;ta.value=await r.text();b.querySelector('#imp').click();}catch(err){toast('설계안 파일을 받지 못했어요. 인터넷 연결을 확인해 주세요');}e.target.disabled=false;});
+    b.querySelector('#imp').addEventListener('click',async()=>{
     const btn=b.querySelector('#imp');btn.disabled=true;await safeBackup('pre','데이터 가져오기 직전');btn.disabled=false;
     try{
-      const raw=JSON.parse(b.querySelector('textarea').value);
+      const txt=ta.value.trim();if(!txt)throw new Error('붙여 넣은 내용이 없어요');
+      let raw;try{raw=JSON.parse(txt);}catch(pe){throw new Error(txt.length>=99990?'붙여넣기가 '+txt.length.toLocaleString()+'글자에서 잘렸어요 → 📂 파일에서 로 여세요':'글자 형식이 깨졌어요 (끝까지 복사됐는지 확인)');}
       if(raw&&Array.isArray(raw.plans)){if(!plansSupported())throw new Error('설계안 저장은 공유 방이나 혼자 모드에서만 돼요');let n=0;
         for(const pl of raw.plans){if(!pl||!Array.isArray(pl.items))continue;const m=new Map(state.items.map(i=>[i.id,clone(i)]));pl.items.map(i=>normalize(i.id,i)).filter(Boolean).forEach(i=>m.set(i.id,i));if(await savePlan(String(pl.name||'설계안').slice(0,40),[...m.values()],true,pl.desc))n++;}
         closeModal();showTab('team',true);toast('🗳️ 설계안 '+n+'개를 투표 목록에 넣었어요 (지금 설계는 그대로)');return;}
