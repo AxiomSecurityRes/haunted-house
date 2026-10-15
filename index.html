@@ -2067,7 +2067,7 @@ function bindHost(el){
 /* =========================================================
    app version check + server-side automatic backups (Firebase)
    ========================================================= */
-const APP_VERSION='2026.10.15-29';
+const APP_VERSION='2026.10.16-30';
 let updShown=false;
 async function checkUpdate(){
   if(inClaude||updShown||!/^https?:$/.test(location.protocol))return;
@@ -2453,7 +2453,7 @@ function openInstallPlan(){
   const hasCeil=vis.some(i=>{const k=planKind(i);return k==='ceil'||k==='ceilCover'||(k==='light'&&mountOf(i)==='ceil');});
   const sc=secretChecks();const now=new Date().toLocaleString('ko-KR');
   const head=(t,sub)=>'<h1>'+t+'</h1><div class="sub">'+sub+'</div>';
-  const html='<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>1-8 귀신의 집 설치 도면</title><style>@page{size:A4 landscape;margin:8mm}body{font-family:-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;color:#111;margin:0}h1{font-size:19px;margin:0 0 2px}h2{font-size:14px;margin:10px 0 4px}.sub{color:#555;font-size:11.5px;margin-bottom:6px}.pg{page-break-after:always;break-after:page}.plan{display:flex;gap:10px;align-items:flex-start}.plan>.map{flex:1;min-width:0}.plan>.side{width:230px;font-size:11.5px}table{border-collapse:collapse;width:100%;font-size:11px}th,td{border:1px solid #bbb;padding:3px 5px;text-align:left;vertical-align:top}th{background:#f2f2f2}.n{width:24px;text-align:center;font-weight:700}.ok{color:#15803d;font-weight:700}.bad{color:#dc2626;font-weight:700}.leg{display:flex;flex-direction:column;gap:5px}.leg span{display:flex;align-items:center;gap:6px}.leg svg{flex:none}.bdg{display:inline-block;background:#111;color:#fff;border-radius:50%;width:18px;height:18px;text-align:center;line-height:18px;font-size:11px}.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}.cat td{background:#fafafa;font-weight:700}.bar{display:flex;gap:8px;margin:8px 0}button{font-size:14px;padding:8px 14px}@media print{.bar{display:none}}@media (max-width:800px){.plan{flex-direction:column}.plan>.side{width:auto}}</style></head><body>'+
+  const html='<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>1-8 귀신의 집 설치 도면</title><style>@page{size:A4 landscape;margin:8mm}body{font-family:-apple-system,"Malgun Gothic","Apple SD Gothic Neo",sans-serif;color:#111;margin:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}h1{font-size:19px;margin:0 0 2px}h2{font-size:14px;margin:10px 0 4px}.sub{color:#555;font-size:11.5px;margin-bottom:6px}.pg{page-break-after:always;break-after:page}.plan{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:10px;align-items:start}.plan>.map{min-width:0}.plan>.map>svg{display:block;width:100%;height:auto;max-height:178mm}.plan>.side{font-size:11px}table{border-collapse:collapse;width:100%;font-size:9.5px;line-height:1.25}th,td{border:1px solid #bbb;padding:1px 4px;text-align:left;vertical-align:top}th{background:#f2f2f2}.n{width:20px;text-align:center;font-weight:700}tr{break-inside:avoid}.ok{color:#15803d;font-weight:700}.bad{color:#dc2626;font-weight:700}.leg{display:flex;flex-direction:column;gap:5px}.leg span{display:flex;align-items:center;gap:6px}.leg svg{flex:none}.bdg{display:inline-block;background:#111;color:#fff;border-radius:50%;width:18px;height:18px;text-align:center;line-height:18px;font-size:11px}.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}.cat td{background:#fafafa;font-weight:700}.bar{display:flex;gap:8px;margin:8px 0}button{font-size:14px;padding:8px 14px}@media print{.bar{display:none}}@media screen and (max-width:800px){.plan{grid-template-columns:1fr}}</style></head><body>'+
     '<div class="bar"><button onclick="print()">🖨️ 인쇄 / PDF로 저장</button></div>'+
     '<div class="pg">'+head('1-8 귀신의 집 — 바닥 설치 도면',now+' 기준 · 교실 '+fmt(Wcm)+'×'+fmt(Dcm)+'cm · 격자 1m · 위쪽이 칠판(앞)')+
       '<div class="plan"><div class="map">'+planSVG(state.items,{numbers,route:r,full:1,layer:'floor'})+'</div><div class="side"><h2>기호</h2>'+planLegend(floorKinds)+
@@ -2766,6 +2766,7 @@ function sendGame(){
 }
 /* ----- update log (shown in 설정 and after an update) ----- */
 const CHANGELOG=[
+  ['2026.10.16-30','10/16',['설치 도면 인쇄: 도면이 종이 한 장을 꽉 채우게 (작게 찍히던 문제), 색도 그대로 인쇄']],
   ['2026.10.15-29','10/15',['👥 조별 역할 나누기 (제작 모드): 조장이 직접 — 조 카드의 🖌️ 영역 정하기 → 3D에서 방 바닥을 누르면 그 방 안 물건이 전부 그 조, 물건을 누르면 하나만','🗺️ 방·구역 목록에서 1·2·3·4·📣 버튼 한 번으로 나누기 · 🧽 지우개','👀 보기: 화면 위 큰 띠 + 다른 조 물건은 거의 투명, 우리 조 물건은 조 색 테두리','목록의 담당 버튼 = 조 고르기 (이름 직접도 가능)','담당 없는 것 개수·찾기 · 조별 역할표에 구역 표시','자동 배정 없앰 (설계안 3개도 담당 비움)','설계안 3개: 심판석을 가운데 벽 4번째 책상 자리로']],
   ['2026.10.15-27','10/14',['데이터 가져오기: “투표용 설계안 3개 불러오기” 버튼 (붙여넣기 없이 바로)','📂 파일에서 가져오기 — 휴대폰 붙여넣기가 10만 글자에서 잘리던 문제 해결','잘린 붙여넣기는 원인을 알려줌']],
   ['2026.10.15-26','10/15',['🔨 제작 모드 새 단장: 단계 표시줄(바닥 표시→책상→비닐→소품→카드→장식→조명→마무리), 지금 할 것 카드에 미니 도면과 줄자 화살표(창가벽·앞벽에서 몇 cm), 치수 칩, 단계별 방법, 나중에 하기, 제작 시간, 사람별 진행','제작 모드에서 고른 물건에 3D 치수선','설계안 묶음 가져오기: 여러 안을 한 번에 투표 목록에 넣기 (지금 설계는 안 바뀜)']],
